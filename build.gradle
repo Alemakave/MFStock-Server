@@ -4,8 +4,8 @@ ext.JETTY_JSP_VERSION = "9.2.19.v20160908" // Old version: '9.2.19.v20160908'   
 apply plugin: 'java'
 apply plugin: 'application'
 
-sourceCompatibility = 14
-targetCompatibility = 14
+sourceCompatibility = 11
+targetCompatibility = 11
 compileJava.options.encoding = 'UTF-8'
 
 group 'ru.alemakave.mfstock.server'
