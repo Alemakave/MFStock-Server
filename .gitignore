@@ -1,0 +1,6 @@
+/src/test/
+/build/
+/.idea/
+/.gradle/
+/DBConfigs.json
+/src/main/java/ru/alemakave/mfstock/Starter.java
