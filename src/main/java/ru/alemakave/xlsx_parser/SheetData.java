@@ -47,7 +47,6 @@ public class SheetData {
                 for (int j = 0; j < rowCells.size(); j++) {
                     if (rows.get(0).cells.get(j).value.equals(columnHeader)) {
                         newRowCells.add(row.cells.get(j));
-                        break;
                     }
                 }
             }
