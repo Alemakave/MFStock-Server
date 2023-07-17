@@ -61,18 +61,15 @@ public class Downloader {
     /**
      * @param filePath path to file
      * @return Downloaded status
-     * -1 - File not fount in server
-     * 0 - File downloaded
-     * 1 - File exists in folder
      */
-    public byte download(String filePath) {
+    public DownloadStatus download(String filePath) {
         return download(new File(filePath));
     }
 
-    public byte download(File file) {
+    public DownloadStatus download(File file) {
         try {
             if (checkDownloadedFile && check(file))
-                return 1;
+                return DownloadStatus.EXISTS;
             else if (!checkDownloadedFile && file.exists())
                 file.delete();
             if (isAutoCreateTreeDirs) {
@@ -115,11 +112,11 @@ public class Downloader {
         } catch (FileNotFoundException e1) {
             Logger.errorF("File \"%s\" not fount in server! (URL: %s)\n", file.getName(), downloadFileUrl.toString());
             file.delete();
-            return -1;
+            return DownloadStatus.NOT_FOUND;
         } catch (URISyntaxException | IOException e) {
             Logger.fatal(e);
         }
-        return 0;
+        return DownloadStatus.LOADED;
     }
 
     public void updateProgress(String fileName, long a, long b) {
