@@ -85,4 +85,9 @@ public final class OS {
             return getOS();
         }
     }
+
+    public enum OSBitType {
+        X32,
+        X64
+    }
 }

@@ -5,7 +5,9 @@ import ru.alemakave.slib.file.pom.POM;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -75,26 +77,28 @@ public class LibUtils {
     }
 
     public boolean installLib(Lib lib) {
-        boolean isInstallLib = downloadLib(lib) != -1;
+        boolean isInstallLib;
+        if (lib == null)
+            return false;
+
+        if (lib instanceof IntegratedLib) {
+            isInstallLib = extractLib((IntegratedLib)lib) != -1;
+        } else {
+            isInstallLib = downloadLib(lib) != DownloadStatus.NOT_FOUND;
+        }
 
         String path = buildPathToFile(lib);
 
-        //if (OS.getJavaVersion().equals("14.0.2")) {
-            if (new File(path + ".jar").exists())
-                paths.add(path + ".jar");
-            if (new File(path + ".so").exists())
-                paths.add(path + ".so");
-        //}
-        //else {
-        //    if (new File(path + ".jar").exists())
-        //        isInstallLib &= loadClass(path + ".jar");
-        //    if (new File(path + ".so").exists())
-        //        isInstallLib &= loadNative(new File(path + ".so"));
-        //}
+        if (new File(path + ".jar").exists())
+            paths.add(path + ".jar");
+        if (new File(path + ".dll").exists())
+            paths.add(path + ".dll");
+        if (new File(path + ".so").exists())
+            paths.add(path + ".so");
         return isInstallLib;
     }
 
-    public byte downloadLib(Lib lib) {
+    public DownloadStatus downloadLib(Lib lib) {
         int numberRepository = 0;
         String filepath = buildPathToFile(lib);
 
@@ -102,7 +106,7 @@ public class LibUtils {
             for (numberRepository = 0; numberRepository < repositories.size(); numberRepository++) {
                 Downloader loader = new Downloader(buildDownloadUrl(lib, numberRepository) + ".pom");
                 loader.setAutoCreateTreeDirs(true);
-                if (loader.download(filepath + ".pom") != -1) break;
+                if (loader.download(filepath + ".pom") != DownloadStatus.NOT_FOUND) break;
             }
         }
         try {
@@ -125,15 +129,57 @@ public class LibUtils {
             return loader.download(filepath + ".jar");
         }
 
-        return 1;
+        return DownloadStatus.EXISTS;
+    }
+
+    public byte extractLib(IntegratedLib lib) {
+        try {
+            String libPath = buildLibPath(lib);
+            if (lib instanceof IntegratedJarLib) {
+                libPath += ".jar";
+            } else if (lib instanceof IntegratedNativeLib) {
+                switch (OS.OperationSystem.current()) {
+                    case WINDOWS:
+                        libPath += "-" + ((IntegratedNativeLib) lib).getSystemBitTypeAsString() + ".dll";
+                        break;
+                    case LINUX:
+                        libPath += ".so";
+                        break;
+                }
+            }
+            System.out.println("Extract: " + "libs/" + libPath);
+            InputStream libInputStream = getClass().getProtectionDomain().getClassLoader().getResourceAsStream("libs/" + libPath);
+            if (libInputStream != null) {
+                byte[] libData = libInputStream.readAllBytes();
+                FileOutputStream libOutputStream = new FileOutputStream(new File(libDir, libPath));
+                libOutputStream.write(libData);
+                libOutputStream.close();
+                libInputStream.close();
+                System.out.println("Saved to: " + buildPathToFile(lib));
+            } else {
+                Logger.errorF("Lib input stream for \"%s\" is null", libPath);
+                return -1;
+            }
+
+            return 0;
+        } catch (IOException e) {
+            Logger.error("IOException");
+            Logger.error(e);
+            return -1;
+        }
+    }
+
+    public String buildLibPath(Lib lib) {
+        return lib.getGroupID().replaceAll("\\.", "/") + "/" + lib.getArtefactID() + "/" + lib.getVersion() + "/" + lib.getArtefactID() + "-" + lib.getVersion() + (lib.getArtifactSuffix() != null ? ("-" + lib.getArtifactSuffix()) : "");
     }
 
     public String buildDownloadUrl(Lib lib, int numberRepository) {
-        String libPath = lib.getGroupID().replaceAll("\\.", "/") + "/" + lib.getArtefactID() + "/" + lib.getVersion() + "/" + lib.getArtefactID() + "-" + lib.getVersion() + (lib.getArtifactSuffix() != null ? ("-" + lib.getArtifactSuffix()) : "");
+        String libPath = buildLibPath(lib);
         return repositories.get(repositories.keySet().toArray()[numberRepository].toString()) + libPath;
     }
 
     public String buildPathToFile(Lib lib) {
+        /*
         StringBuilder pathToFile = new StringBuilder(libDir + sep);
         for (String s : lib.getGroupID().split("\\.")) {
             pathToFile.append(s).append(sep);
@@ -142,7 +188,8 @@ public class LibUtils {
         pathToFile.append(lib.getVersion()).append(sep);
         pathToFile.append(lib.getArtefactID()).append("-").append(lib.getVersion()).append((lib.getArtifactSuffix() != null ? ("-" + lib.getArtifactSuffix()) : ""));
 
-        return pathToFile.toString();
+        return pathToFile.toString();*/
+        return libDir + sep + buildLibPath(lib).replace("/", sep);
     }
 
     @Deprecated
@@ -186,8 +233,8 @@ public class LibUtils {
         for (String rep : defaultRepositories.values()) {
             Downloader loader = new Downloader(rep + groupID.replaceAll("\\.", "/") + "/" + artifactID + "/maven-metadata.xml");
             File metadata = new File(tmpDir + sep + artifactID + ".maven-metadata.xml");
-            byte key = loader.download(metadata);
-            if (key != -1) return metadata;
+            DownloadStatus key = loader.download(metadata);
+            if (key != DownloadStatus.NOT_FOUND) return metadata;
         }
 
         return null;
