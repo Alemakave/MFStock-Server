@@ -1,6 +1,9 @@
 package ru.alemakave.mfstock.server.utils;
 
+import org.eclipse.jetty.http.HttpMethod;
+
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,5 +38,24 @@ public class PageUtils {
             }
         }
         return result;
+    }
+
+    public static String readAllPostData(HttpServletRequest req) throws IOException {
+        if (req.getMethod().equalsIgnoreCase(HttpMethod.POST.asString())) {
+            StringBuilder data = new StringBuilder();
+
+            String line = req.getReader().readLine();
+            while (line != null) {
+                data.append(line);
+                data.append("\n");
+                line = req.getReader().readLine();
+            }
+
+            return data.toString();
+        }
+
+        System.out.println("[{E} readAllPostData(req, resp)]: Method is not POST!");
+        System.out.println("[{E} readAllPostData(req, resp)]: Method: " + req.getMethod());
+        return null;
     }
 }
