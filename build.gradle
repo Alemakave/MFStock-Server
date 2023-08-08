@@ -9,7 +9,7 @@ targetCompatibility = 11
 compileJava.options.encoding = 'UTF-8'
 
 group 'ru.alemakave.mfstock.server'
-version '0.0.2-ALPHA'
+version '0.0.3-ALPHA'
 mainClassName = "ru.alemakave.BootstrapStarter"
 
 repositories {
@@ -28,7 +28,14 @@ dependencies {
     implementation group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.10.5"
 
     implementation group: "org.reflections", name: "reflections", version: "0.9.11"
-    implementation group: "org.jetbrains", name: "annotations", version: "15.0"
+    compileOnly group: "org.jetbrains", name: "annotations", version: "24.0.1"
+    implementation group: 'com.google.zxing', name: 'javase', version: '3.5.1'
+    implementation group: 'com.google.zxing', name: 'core', version: '3.5.1'
+    implementation group: 'org.jxls', name: 'jxls-poi', version: '2.12.0'
+    implementation 'com.itextpdf:itextpdf:5.5.13.2'
+    println(projectDir.absolutePath + "/src/main/resources/libs/com/jacob/1.20")
+    implementation files(projectDir.absolutePath + "/src/main/resources/libs/com/jacob/1.20/jacob-1.20.jar")
+    implementation files(projectDir.absolutePath + "/src/main/resources/libs/com/jacob/1.20/jacob-1.20-x64.dll")
 }
 
 jar {

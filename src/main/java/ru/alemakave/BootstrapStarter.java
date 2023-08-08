@@ -1,9 +1,6 @@
 package ru.alemakave;
 
-import ru.alemakave.slib.utils.Lib;
-import ru.alemakave.slib.utils.LibUtils;
-import ru.alemakave.slib.utils.Logger;
-import ru.alemakave.slib.utils.OS;
+import ru.alemakave.slib.utils.*;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -60,6 +57,7 @@ public class BootstrapStarter {
         command.add(System.getProperty("java.home") + sep + "bin" + sep + "java" + (OS.OperationSystem.current() == WINDOWS ? ".exe" : ""));
         command.add("-Dfile.encoding=UTF-8");
         command.addAll(jvmArgs);
+        command.add("-Djava.library.path=" + lu.getNativeDirsCommandPart());
         command.add("-cp");
         command.add(lu.getClassPathCommandPart());
         command.add("ru.alemakave.Bootstrap");
@@ -73,7 +71,6 @@ public class BootstrapStarter {
         }
         Logger.info("Process closed. Exit code: " + bootstrapProcess.exitValue());
         if (bootstrapProcess.exitValue() == 255) {
-            lu.clear();
             main(args);
         }
     }
@@ -114,7 +111,6 @@ public class BootstrapStarter {
         libs.add(new Lib("org.eclipse.jetty", "jetty-proxy", jettyVersion));
         libs.add(new Lib("org.eclipse.jetty", "jetty-util", jettyVersion));
         libs.add(new Lib("org.eclipse.jetty", "jetty-webapp", jettyVersion));
-        libs.add(new Lib("org.jetbrains", "annotations", "15.0"));
 
         libs.add(new Lib("org.slf4j", "slf4j-api", "1.7.25"));
         libs.add(new Lib("org.slf4j", "slf4j-simple", "1.7.25"));
@@ -122,6 +118,18 @@ public class BootstrapStarter {
         libs.add(new Lib("com.fasterxml.jackson.core", "jackson-core", "2.10.5"));
         libs.add(new Lib("com.fasterxml.jackson.core", "jackson-annotations", "2.10.5"));
         libs.add(new Lib("com.fasterxml.jackson.core", "jackson-databind", "2.10.5"));
+        libs.add(new Lib("com.google.zxing", "core", "3.5.1"));
+        libs.add(new Lib("com.google.zxing", "javase", "3.5.1"));
+        libs.add(new Lib("org.apache.poi", "poi", "4.1.2"));
+        libs.add(new Lib("org.apache.poi", "poi-ooxml", "4.1.2"));
+        libs.add(new Lib("org.apache.poi", "poi-ooxml-schemas", "4.1.2"));
+        libs.add(new Lib("org.apache.xmlbeans", "xmlbeans", "3.1.0"));
+        libs.add(new Lib("org.apache.commons", "commons-math3", "3.6.1"));
+        libs.add(new Lib("org.apache.commons", "commons-collections4", "4.4"));
+        libs.add(new Lib("commons-codec", "commons-codec", "1.13"));
+        libs.add(new Lib("com.zaxxer", "SparseBitSet", "1.2"));
+        libs.add(new IntegratedJarLib("com", "jacob", "1.20"));
+        libs.add(new IntegratedNativeLib("com", "jacob", "1.20", OS.OSBitType.X64));
 
         lu = new LibUtils(libsDir, libs);
         lu.addRepository("Sonatype Nexus Snapshots", "https://oss.sonatype.org/content/repositories/snapshots/");

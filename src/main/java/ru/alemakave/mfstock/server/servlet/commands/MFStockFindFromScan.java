@@ -1,6 +1,8 @@
 package ru.alemakave.mfstock.server.servlet.commands;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eclipse.jetty.http.HttpMethod;
+import ru.alemakave.mfstock.server.MFStockServer;
 import ru.alemakave.slib.servlet.IServletCommand;
 import ru.alemakave.slib.utils.Logger;
 import ru.alemakave.slib.utils.StringUtils;
@@ -23,7 +25,14 @@ public class MFStockFindFromScan implements IServletCommand {
     }
 
     @Override
-    public void call(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public void call(HttpMethod method, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        if (xlsxDatabase == null) {
+            try {
+                MFStockServer.loadDB();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
         ServletOutputStream output = resp.getOutputStream();
         resp.setContentType("application/json;charset=UTF-8");
         ObjectMapper mapper = new ObjectMapper();
