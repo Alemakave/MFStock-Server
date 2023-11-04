@@ -1,0 +1,78 @@
+.header-element {
+    display: inline;
+    line-height: 40px;
+    background: rgb(112, 112, 112);
+    flex: 1;
+    text-decoration: none;
+    color: white;
+    text-align: center;
+}
+
+.header-element:hover:not([class*=selected]):not([class*=empty]) {
+    background: rgb(144, 144, 144);
+}
+
+.selected {
+    border-color: rgb(192, 192, 192);
+    border-bottom-style: solid;
+    border-bottom-width: 3px;
+    cursor: default;
+    background: rgb(128, 128, 128);
+}
+
+.label {
+    text-anchor: middle;
+    height: 50%;
+    margin: 4px 0;
+}
+
+.input {
+    margin: 4px 0;
+}
+
+#header {
+    height: 50px;
+    background-color: black;
+    margin: 0;
+    color: white;
+    display: flex;
+    flex-direction: row;
+}
+
+#input-sticker-copies {
+    width: 40px;
+}
+
+#print-button {
+    height: 30px;
+    width: 70px;
+    text-align: center;
+}
+
+#sticker-label-block {
+    display: flex;
+    flex-direction: column;
+    padding: 0 7px;
+}
+
+#sticker-input-block {
+    display: flex;
+    flex-direction: column;
+}
+
+#sticker-block, #sticker-buttons-block {
+    display: flex;
+}
+
+#base-block {
+    background: rgba(0, 0, 0, 30%);
+    width: fit-content;
+    padding: 10px;
+    border-radius: 10px;
+    margin: 5px 0;
+}
+
+body {
+    padding: 0;
+    margin: 0 5px;
+}

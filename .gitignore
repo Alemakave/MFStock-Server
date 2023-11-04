@@ -4,3 +4,10 @@
 /.gradle/
 /DBConfigs.json
 /src/main/java/ru/alemakave/mfstock/Starter.java
+/jacob-1.20-x64.dll
+/MFStockServer.properties
+/compile_ignore.list
+/*.iml
+/*.ipr
+/*.iws
+/TODO.md

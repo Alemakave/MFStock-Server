@@ -4,8 +4,11 @@ import com.jacob.activeX.ActiveXComponent;
 import com.jacob.com.ComThread;
 import com.jacob.com.Dispatch;
 import com.jacob.com.Variant;
+import ru.alemakave.slib.PrintConfigurationBuilder.ExcelPrintConfiguration;
+import ru.alemakave.slib.PrintConfigurationBuilder.PrintConfiguration;
 
 import javax.print.DocFlavor;
+import javax.print.PrintException;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
 import java.io.File;
@@ -16,25 +19,41 @@ public class PrintUtils {
         return PrintServiceLookup.lookupPrintServices(DocFlavor.INPUT_STREAM.AUTOSENSE, null);
     }
 
-    public static void printFile(File file, String printerName) throws FileNotFoundException {
+    public static String[] getPrintersName() {
+        PrintService[] printers = getPrinters();
+        String[] result = new String[printers.length];
+
+        for (int i = 0; i < printers.length; i++) {
+            result[i] = printers[i].getName();
+        }
+
+        return result;
+    }
+
+    public static void printFile(File file, PrintConfiguration printConfigurationBuilder) throws FileNotFoundException, PrintException {
         if (!file.exists()) {
             throw new FileNotFoundException(String.format("File not found: \"%s\"", file.getAbsolutePath()));
         }
 
         if (file.getName().endsWith(".xls") || file.getName().endsWith(".xlsx") || file.getName().endsWith(".xlt")) {
-            printExcelFile(file, printerName);
+            if (!(printConfigurationBuilder instanceof ExcelPrintConfiguration)) {
+                throw new PrintException("Unsupported print configuration for excel file.");
+            }
+
+            printExcelFile(file, (ExcelPrintConfiguration)printConfigurationBuilder);
         }
     }
 
-    private static void printExcelFile(File file, String activePrinter) {
-        int from = 1;
-        int to = 1;
-        int copies = 1;
-        boolean preview = false;
-        boolean printToFile = false;
-        boolean collate = false;
-        String printToFileName = "";
-        boolean ignorePrintAreas = false;
+    private static void printExcelFile(File file, ExcelPrintConfiguration printConfigurationBuilder) {
+        int from = printConfigurationBuilder.getFrom();
+        int to = printConfigurationBuilder.getTo();
+        int copies = printConfigurationBuilder.getCopies();
+        boolean preview = printConfigurationBuilder.isPreview();
+        String activePrinter = printConfigurationBuilder.getPrinterName();
+        boolean printToFile = printConfigurationBuilder.isPrintToFile();
+        boolean collate = printConfigurationBuilder.isCollate();
+        String printToFileName = printConfigurationBuilder.getPrintToFileName();
+        boolean ignorePrintAreas = printConfigurationBuilder.isIgnorePrintAreas();
 
         ComThread.InitSTA();
 

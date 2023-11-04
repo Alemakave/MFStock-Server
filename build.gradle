@@ -1,58 +1,45 @@
+import java.text.SimpleDateFormat
+
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.7.16'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+}
+
 ext.JETTY_VERSION = "9.2.19.v20160908" // Old version: '9.2.19.v20160908'       New version: "11.0.7"
 ext.JETTY_JSP_VERSION = "9.2.19.v20160908" // Old version: '9.2.19.v20160908'   New version: "9.3.0.M1"
-
-apply plugin: 'java'
-apply plugin: 'application'
 
 sourceCompatibility = 11
 targetCompatibility = 11
 compileJava.options.encoding = 'UTF-8'
 
 group 'ru.alemakave.mfstock.server'
-version '0.0.3-ALPHA'
-mainClassName = "ru.alemakave.BootstrapStarter"
+version '0.0.4-ALPHA'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation group: 'org.eclipse.jetty', name: 'jetty-server', version: JETTY_VERSION
-    implementation group: 'org.eclipse.jetty', name: 'jetty-proxy', version: JETTY_VERSION
-    implementation group: 'org.eclipse.jetty', name: 'jetty-webapp', version: JETTY_VERSION
-    implementation group: 'org.eclipse.jetty', name: 'jetty-jmx', version: JETTY_VERSION
-    implementation group: 'org.eclipse.jetty', name: 'jetty-jsp', version: JETTY_JSP_VERSION
-
-    implementation group: "com.fasterxml.jackson.core", name: "jackson-core", version: "2.10.5"
-    implementation group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: "2.10.5"
-    implementation group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.10.5"
-
-    implementation group: "org.reflections", name: "reflections", version: "0.9.11"
-    compileOnly group: "org.jetbrains", name: "annotations", version: "24.0.1"
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:2.4.1"
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation group: 'com.google.zxing', name: 'javase', version: '3.5.1'
     implementation group: 'com.google.zxing', name: 'core', version: '3.5.1'
     implementation group: 'org.jxls', name: 'jxls-poi', version: '2.12.0'
     implementation 'com.itextpdf:itextpdf:5.5.13.2'
-    println(projectDir.absolutePath + "/src/main/resources/libs/com/jacob/1.20")
     implementation files(projectDir.absolutePath + "/src/main/resources/libs/com/jacob/1.20/jacob-1.20.jar")
     implementation files(projectDir.absolutePath + "/src/main/resources/libs/com/jacob/1.20/jacob-1.20-x64.dll")
-}
 
-jar {
-    manifest {
-        attributes(
-                'Main-Class': mainClassName,)
-    }
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 test {
     useJUnitPlatform()
 }
 
-distTar {
-    exclude("*")
-}
-
-distZip {
-    exclude("*")
+tasks.register('buildSnapshot') {
+    SimpleDateFormat format = new SimpleDateFormat("yyyyMMddhhmmss")
+    version = version.toString().split("-")[0] + "-snapshot" + format.format(new Date())
+    dependsOn("build")
 }
