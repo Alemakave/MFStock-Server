@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<script type="text/javascript">
+			async function mfstockGenerateNomSticker() {
+				let nomCode = document.getElementById("nomCode").value;
+				let nomName = document.getElementById("nomName").value;
+				fetch(document.URL, {
+					method: 'POST',
+					body: JSON.stringify({
+						rows: [nomCode, nomName]
+					}),
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				});
+			}
+		</script>
+		<meta charset="UTF-8">
+		<title>NomGenerator</title>
+	</head>
+	<body style="padding: 0;margin: 0;">
+		<div style="background: rgba(0, 0, 0, 30%);width: fit-content;padding: 10px;border-radius: 10px;">
+			<div style="display: flex;">
+				<div style="display: flex;flex-direction: column;">
+					<div style="text-anchor: middle;height: 50%;margin: 4px 0;">NomName:</div>
+					<div style="text-anchor: middle;height: 50%;margin: 4px 0;">NomCode:</div>
+				</div>
+				<div style="display: flex;flex-direction: column;">
+					<input id="nomName" style="margin: 4px 0;">
+					<input id="nomCode" style="margin: 4px 0;">
+				</div>
+			</div>
+			<div style="display: flex;direction: rtl;">
+				<button style="height: 30px; width: 70px; background: white; border-radius: 10px; text-align: center;" onclick="mfstockGenerateNomSticker();">Print</button>
+			</div>
+		</div>
+	</body>
+</html>
