@@ -11,3 +11,5 @@
 /*.ipr
 /*.iws
 /TODO.md
+/MFStockServer*.json
+/output/*
