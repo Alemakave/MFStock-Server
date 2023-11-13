@@ -3,13 +3,12 @@ package ru.alemakave.mfstock.model.table;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import ru.alemakave.mfstock.configs.model.DBConfigsColumns;
 import ru.alemakave.mfstock.model.json.DateTimeJson;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,9 +30,8 @@ public class Table {
     }
 
     private void init(File file) throws IOException {
-        BasicFileAttributes fileAttributes = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
-        databaseDate = new DateTimeJson(fileAttributes.creationTime(), new SimpleDateFormat("dd.MM.yyyy HH:mm"));
         Workbook workbook = WorkbookFactory.create(file);
+        databaseDate = new DateTimeJson(((XSSFWorkbook)workbook).getProperties().getCoreProperties().getModified(), new SimpleDateFormat("dd.MM.yyyy HH:mm"));
         Sheet sheet = workbook.getSheetAt(0);
         rows = StreamSupport.stream(sheet.spliterator(), false)
                 .collect(RowCollector.instance());

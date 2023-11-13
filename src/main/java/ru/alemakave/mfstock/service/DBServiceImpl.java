@@ -58,6 +58,7 @@ public class DBServiceImpl implements IDBService {
     @Override
     public String findFromScan(String searchString) {
         try {
+            searchString = searchString.strip();
             logger.info("Search string: " + searchString);
             List<TableRow> rows = new ArrayList<>();
             rows.add(getDB().getRows().get(0));

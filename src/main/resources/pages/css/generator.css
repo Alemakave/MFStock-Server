@@ -1,6 +1,6 @@
 .header-element {
     display: inline;
-    line-height: 40px;
+    line-height: 50px;
     background: rgb(112, 112, 112);
     flex: 1;
     text-decoration: none;
@@ -53,11 +53,13 @@
     display: flex;
     flex-direction: column;
     padding: 0 7px;
+    flex: 1;
 }
 
 #sticker-input-block {
     display: flex;
     flex-direction: column;
+    flex: 1;
 }
 
 #sticker-block, #sticker-buttons-block {
@@ -66,13 +68,27 @@
 
 #base-block {
     background: rgba(0, 0, 0, 30%);
-    width: fit-content;
     padding: 10px;
     border-radius: 10px;
     margin: 5px 0;
+    width: 350px;
 }
 
 body {
     padding: 0;
     margin: 0 5px;
+}
+
+.profile {
+    width: 50px;
+    background: black;
+    max-width: 50px;
+    display: none;
+}
+.profile-icon {
+    background: white;
+    width: 42px;
+    height: 42px;
+    margin: 4px;
+    border-radius: 50%;
 }
