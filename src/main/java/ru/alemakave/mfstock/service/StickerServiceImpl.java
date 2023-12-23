@@ -66,6 +66,15 @@ public class StickerServiceImpl implements IStickerService {
     }
 
     @Override
+    public String getCellStickerGenerator() throws IOException {
+        try (InputStream pageNomSerStickerInputStream = context.getResource(PAGE_CELL_STICKER_RESOURCE_LOCATION).getInputStream()) {
+            try (BufferedInputStream bufferedPageNomSerStickerInputStream = new BufferedInputStream(pageNomSerStickerInputStream)) {
+                return new String(bufferedPageNomSerStickerInputStream.readAllBytes());
+            }
+        }
+    }
+
+    @Override
     public String postNomStickerGenerator(String requestBody) {
         log.info(String.format("postNomStickerGenerator(%s)", requestBody));
         final String stickerTempFileName = "nom_sticker.xlt";
@@ -99,6 +108,27 @@ public class StickerServiceImpl implements IStickerService {
             nomSerStickerGenerator.generate(stickerTempFile, dta.getCode(), dta.getName(), dta.getSerial());
             ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(configLoader.getMfStockConfig().getPrinterName());
             printConfiguration.setCopies(Integer.parseInt(dta.getCopies()));
+            PrintUtils.printFile(stickerTempFile, printConfiguration);
+            //noinspection ResultOfMethodCallIgnored
+            stickerTempFile.delete();
+        } catch (IOException | PrintException | WriterException e) {
+            throw new RuntimeException(e);
+        }
+        return requestBody;
+    }
+
+    @Override
+    public String postCellStickerGenerator(String requestBody) {
+        log.info(String.format("postCellStickerGenerator(%s)", requestBody));
+        final String stickerTempFileName = "cell_sticker.xlt";
+        final ObjectMapper mapper = new ObjectMapper();
+        try {
+            final CellSticker dta = mapper.readValue(requestBody, CellSticker.class);
+            final File stickerTempFile = new File(stickerTempFileName);
+            CellStickerGenerator nomSerStickerGenerator = new CellStickerGenerator(context);
+            nomSerStickerGenerator.generate(stickerTempFile, dta.getCellAddress(), dta.getCellCode());
+            ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(configLoader.getMfStockConfig().getPrinterName());
+            printConfiguration.setCopies(1);
             PrintUtils.printFile(stickerTempFile, printConfiguration);
             //noinspection ResultOfMethodCallIgnored
             stickerTempFile.delete();

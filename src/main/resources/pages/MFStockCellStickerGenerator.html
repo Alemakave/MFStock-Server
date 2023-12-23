@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8">
+		<title>NomGenerator</title>
+		<script type="text/javascript" src="/get-script?name=CellGenerateSender.js"></script>
+		<link rel="stylesheet" href="/get-style?name=generator.css">
+	</head>
+	<body>
+		<div id="header">
+			<a class="header-element" href="/mfstock-generate-nom-sticker">Генератор наклеек на продукцию</a>
+			<a class="header-element" href="/mfstock-generate-nom-ser-sticker">Генератор наклеек с СНИ на продукцию</a>
+			<a class="header-element selected">Генератор наклеек ячеек</a>
+			<a class="header-element empty"></a>
+			<a class="header-element empty"></a>
+			<div class="header-element profile">
+				<div class="profile-icon"></div>
+			</div>
+		</div>
+		<div id="base-block">
+			<div id="sticker-block">
+				<div id="sticker-label-block">
+					<div class="label" name="cell-address">Адрес ячейки:</div>
+					<div class="label" name="cell-code">Код ячейки:</div>
+				</div>
+				<div id="sticker-input-block">
+					<input class="input" id="input-cell-address">
+					<input class="input" id="input-cell-code">
+				</div>
+			</div>
+			<div id="sticker-buttons-block">
+				<div style="width: 100%;"></div>
+				<button id="print-button" onclick="mfstockGenerateCellSticker();">Печать</button>
+			</div>
+			<script type="text/javascript">
+				const inputs = document.getElementsByClassName("input");
+				for (let i = 0; i < inputs.length; i++) {
+					inputs[i].onclick = null;
+					inputs[i].onfocus = inputs[i].select;
+				}
+			</script>
+		</div>
+	</body>
+</html>
