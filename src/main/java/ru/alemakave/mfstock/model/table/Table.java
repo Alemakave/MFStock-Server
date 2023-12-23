@@ -55,6 +55,36 @@ public class Table {
         System.gc();
     }
 
+    //TODO: Добавить получение индексов колонок по заголовку
+    public void postInit() {
+        int nomCodeIndex = 0;
+        int nomSerIndex = 3;
+        int nomCountIndex = 4;
+        int nomCellAddressIndex = 6;
+
+        for (int i = 0; i < rows.size(); i++) {
+            for (int j = i+1; j < rows.size(); j++) {
+                List<TableCell> cells1 = rows.get(i).getCells();
+                List<TableCell> cells2 = rows.get(j).getCells();
+                if (cells1 == null || cells2 == null) {
+                    continue;
+                }
+
+                if (cells1.get(nomCodeIndex).equals(cells2.get(nomCodeIndex))
+                        && cells1.get(nomSerIndex).equals(cells2.get(nomSerIndex))
+                        && cells1.get(nomCellAddressIndex).equals(cells2.get(nomCellAddressIndex))) {
+                    TableCell countCell = cells1.get(nomCountIndex);
+                    countCell.setValue(Integer.toString(Integer.parseInt(countCell.getValue()) + Integer.parseInt(cells2.get(nomCountIndex).getValue())));
+                    rows.get(j).setCells(null);
+                }
+            }
+        }
+
+        rows = rows.stream()
+                .filter(tableRow -> tableRow.getCells() != null)
+                .collect(Collectors.toList());
+    }
+
     public void addColumnPrefix(DBConfigsColumns... configsColumns) {
         for (DBConfigsColumns configsColumn : configsColumns) {
             if (configsColumn.getPrefix() == null)

@@ -14,6 +14,15 @@ public class StickerController {
         this.generatorService = generatorService;
     }
 
+    @GetMapping(path = "/")
+    public String getHomePage() {
+        try {
+            return generatorService.getHomePage();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @RequestMapping(path = "/mfstock-generate-nom-sticker")
     public String getNomStickerGenerator() {
         try {
@@ -42,6 +51,15 @@ public class StickerController {
         return getNomSerStickerGenerator();
     }
 
+    @GetMapping(path = "/mfstock-generate-cell-sticker")
+    public String getCellStickerGenerator() {
+        try {
+            return generatorService.getCellStickerGenerator();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @PostMapping(path = "/mfstock-generate-nom-ser-sticker", consumes = "application/json")
     public String postNomSerStickerGenerator(@RequestBody String requestBody) {
         return generatorService.postNomSerStickerGenerator(requestBody);
@@ -50,6 +68,11 @@ public class StickerController {
     @PostMapping(path = "/mfstock-generate-nom-sticker", consumes = "application/json")
     public String postNomStickerGenerator(@RequestBody String requestBody) {
         return generatorService.postNomStickerGenerator(requestBody);
+    }
+
+    @PostMapping(path = "/mfstock-generate-cell-sticker", consumes = "application/json")
+    public String postCellStickerGenerator(@RequestBody String requestBody) {
+        return generatorService.postCellStickerGenerator(requestBody);
     }
 
     @Deprecated

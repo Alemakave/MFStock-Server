@@ -24,6 +24,7 @@ import java.util.List;
 @Service
 public class DBServiceImpl implements IDBService {
     private static final String CLOSE_DB_PAGE_RESOURCE_PATH = "classpath:/pages/MFStockCloseDBStatus.html";
+    private static final String LOAD_DB_PAGE_RESOURCE_PATH = "classpath:/pages/MFStockLoadDBStatus.html";
 
     private final Logger logger = LoggerFactory.getLogger(DBServiceImpl.class);
 
@@ -53,6 +54,12 @@ public class DBServiceImpl implements IDBService {
         System.gc();
 
         return PageUtils.getPage(configurableApplicationContext.getResource(CLOSE_DB_PAGE_RESOURCE_PATH));
+    }
+
+    @Override
+    public String reloadDB() {
+        loadDB();
+        return PageUtils.getPage(configurableApplicationContext.getResource(LOAD_DB_PAGE_RESOURCE_PATH));
     }
 
     @Override
@@ -97,6 +104,7 @@ public class DBServiceImpl implements IDBService {
                 database.saveColumnsAccordingHeaders(configsColumns);
                 database.addColumnPrefix(configsColumns);
             }
+            database.postInit();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

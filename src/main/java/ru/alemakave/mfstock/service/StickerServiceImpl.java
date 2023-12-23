@@ -7,8 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Service;
 import ru.alemakave.mfstock.configs.service.MFStockConfigLoader;
+import ru.alemakave.mfstock.model.generators.CellStickerGenerator;
 import ru.alemakave.mfstock.model.generators.NomSerStickerGenerator;
 import ru.alemakave.mfstock.model.generators.NomStickerGenerator;
+import ru.alemakave.mfstock.model.json.CellSticker;
 import ru.alemakave.mfstock.model.json.NomSerSticker;
 import ru.alemakave.mfstock.model.json.NomSticker;
 import ru.alemakave.slib.PrintConfigurationBuilder;
@@ -25,6 +27,8 @@ import java.io.InputStream;
 public class StickerServiceImpl implements IStickerService {
     public static final String PAGE_NOM_STICKER_RESOURCE_LOCATION = "classpath:/pages/MFStockNomStickerGenerator.html";
     public static final String PAGE_NOM_SER_STICKER_RESOURCE_LOCATION = "classpath:pages/MFStockNomSerStickerGenerator.html";
+    public static final String PAGE_CELL_STICKER_RESOURCE_LOCATION = "classpath:pages/MFStockCellStickerGenerator.html";
+    public static final String HOME_PAGE_RESOURCE_LOCATION = "classpath:pages/MFStockHome.html";
     private static final Logger log = LoggerFactory.getLogger(StickerServiceImpl.class);
     private final MFStockConfigLoader configLoader;
     private final ConfigurableApplicationContext context;
@@ -32,6 +36,15 @@ public class StickerServiceImpl implements IStickerService {
     public StickerServiceImpl(MFStockConfigLoader configLoader, ConfigurableApplicationContext configurableApplicationContext) {
         this.configLoader = configLoader;
         this.context = configurableApplicationContext;
+    }
+
+    @Override
+    public String getHomePage() throws IOException {
+        try (InputStream pageNomSerStickerInputStream = context.getResource(HOME_PAGE_RESOURCE_LOCATION).getInputStream()) {
+            try (BufferedInputStream bufferedPageNomSerStickerInputStream = new BufferedInputStream(pageNomSerStickerInputStream)) {
+                return new String(bufferedPageNomSerStickerInputStream.readAllBytes());
+            }
+        }
     }
 
     @Override

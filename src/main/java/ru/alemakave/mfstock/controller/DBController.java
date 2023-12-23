@@ -28,6 +28,11 @@ public class DBController {
         return dbService.closeDB();
     }
 
+    @GetMapping(path = "/mfstock-reload-db")
+    public String reloadDB() {
+        return dbService.reloadDB();
+    }
+
     @Deprecated
     @GetMapping(params = {"mfstock-get-db-date"}, produces="application/json")
     public Object getDBDateOutdated(@RequestParam(name="mfstock-get-db-date") String mfstockGetDbDate) {

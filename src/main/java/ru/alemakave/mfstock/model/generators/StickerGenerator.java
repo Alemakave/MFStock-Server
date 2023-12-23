@@ -10,6 +10,7 @@ import java.util.Map;
 
 public abstract class StickerGenerator {
     public static final String TEMPLATE_NOM_SER_STICKER = "templates/r_NomSerStickerMGF.XLT";
+    public static final String TEMPLATE_CELL_STICKER = "templates/r_CellSticker.XLT";
 
     private final InputStream stickerTemplateInputStream;
 
