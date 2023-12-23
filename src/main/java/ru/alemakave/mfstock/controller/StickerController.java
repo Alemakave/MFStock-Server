@@ -23,7 +23,7 @@ public class StickerController {
         }
     }
 
-    @RequestMapping(path = "/mfstock-generate-nom-sticker")
+    @GetMapping(path = "/mfstock-generate-nom-sticker")
     public String getNomStickerGenerator() {
         try {
             return generatorService.getNomStickerGenerator();
@@ -39,16 +39,6 @@ public class StickerController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @GetMapping(params = "mfstock-generate-nom-sticker")
-    public String getNomStickerGenerator(String mfstockGenerateNomSticker) {
-        return getNomStickerGenerator();
-    }
-
-    @GetMapping(params = "mfstock-generate-nom-ser-sticker")
-    public String getNomSerStickerGenerator(String mfstockGenerateNomSerSticker) {
-        return getNomSerStickerGenerator();
     }
 
     @GetMapping(path = "/mfstock-generate-cell-sticker")
@@ -73,18 +63,6 @@ public class StickerController {
     @PostMapping(path = "/mfstock-generate-cell-sticker", consumes = "application/json")
     public String postCellStickerGenerator(@RequestBody String requestBody) {
         return generatorService.postCellStickerGenerator(requestBody);
-    }
-
-    @Deprecated
-    @PostMapping(params = {"mfstock-generate-nom-sticker"}, consumes = "application/json")
-    public String postNomStickerGenerator(@RequestBody String requestBody, @RequestParam(name="mfstock-generate-nom-sticker") String mfstockGenerateNomSticker) {
-        return postNomStickerGenerator(requestBody);
-    }
-
-    @Deprecated
-    @GetMapping(params = {"mfstock-generate-nom-ser-sticker"}, consumes = "application/json")
-    public String postNomSerStickerGenerator(@RequestBody String requestBody, @RequestParam(name="mfstock-generate-nom-ser-sticker") String mfstockGenerateNomSerSticker) {
-        return postNomSerStickerGenerator(requestBody);
     }
 
     @ExceptionHandler({RuntimeException.class})
