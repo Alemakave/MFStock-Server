@@ -6,9 +6,6 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 }
 
-ext.JETTY_VERSION = "9.2.19.v20160908" // Old version: '9.2.19.v20160908'       New version: "11.0.7"
-ext.JETTY_JSP_VERSION = "9.2.19.v20160908" // Old version: '9.2.19.v20160908'   New version: "9.3.0.M1"
-
 sourceCompatibility = 11
 targetCompatibility = 11
 compileJava.options.encoding = 'UTF-8'
@@ -30,6 +27,8 @@ dependencies {
     implementation 'com.itextpdf:itextpdf:5.5.13.2'
     implementation files(projectDir.absolutePath + "/src/main/resources/libs/com/jacob/1.20/jacob-1.20.jar")
     implementation files(projectDir.absolutePath + "/src/main/resources/libs/com/jacob/1.20/jacob-1.20-x64.dll")
+
+    implementation 'org.telegram:telegrambots:6.5.0'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

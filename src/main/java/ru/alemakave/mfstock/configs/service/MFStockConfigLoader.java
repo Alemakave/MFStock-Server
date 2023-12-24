@@ -1,5 +1,6 @@
 package ru.alemakave.mfstock.configs.service;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Scope;
@@ -7,6 +8,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import ru.alemakave.mfstock.configs.model.DBConfigs;
 import ru.alemakave.mfstock.configs.model.MFStockConfig;
+import ru.alemakave.mfstock.configs.model.TelergamBotConfigs;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,10 +19,12 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 @Scope(scopeName = SCOPE_SINGLETON)
 public class MFStockConfigLoader {
     public static final String PROPERTIES_FILE_PATH = "./MFStockServer.json";
-    private final MFStockConfig mfStockConfig;
+    private MFStockConfig mfStockConfig;
+    private TelergamBotConfigs telegramBotConfigs;
 
-    public MFStockConfigLoader(ConfigurableApplicationContext configurableApplicationContext, MFStockConfig mfStockConfig) {
+    public MFStockConfigLoader(ConfigurableApplicationContext configurableApplicationContext, MFStockConfig mfStockConfig, TelergamBotConfigs telegramBotConfigs) {
         this.mfStockConfig = mfStockConfig;
+        this.telegramBotConfigs = telegramBotConfigs;
         checkFileAndCreateIfNotFound();
         load(configurableApplicationContext);
     }
@@ -42,9 +46,20 @@ public class MFStockConfigLoader {
     private void load(ConfigurableApplicationContext configurableApplicationContext) {
         Resource resource = configurableApplicationContext.getResource("file:" + PROPERTIES_FILE_PATH);
         try {
-            MFStockConfig loadedConfig = new ObjectMapper().readValue(resource.getInputStream(), MFStockConfig.class);
-            mfStockConfig.setPrinterName(loadedConfig.getPrinterName());
-            mfStockConfig.setDBConfigs(loadedConfig.getDBConfigs());
+            MFStockConfig mfStockConfig = new ObjectMapper()
+                    .disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES)
+                    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                    .readValue(resource.getInputStream(), MFStockConfig.class);
+            TelergamBotConfigs telegramBotConfigs = new ObjectMapper()
+                    .disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES)
+                    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                    .readValue(resource.getInputStream(), TelergamBotConfigs.class);
+
+            this.mfStockConfig.setDBConfigs(mfStockConfig.getDBConfigs());
+            this.mfStockConfig.setPrinterName(mfStockConfig.getPrinterName());
+
+            this.telegramBotConfigs.setBotName(telegramBotConfigs.getBotName());
+            this.telegramBotConfigs.setBotToken(telegramBotConfigs.getBotToken());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -52,5 +67,9 @@ public class MFStockConfigLoader {
 
     public MFStockConfig getMfStockConfig() {
         return mfStockConfig;
+    }
+
+    public TelergamBotConfigs getTelegramBotConfigs() {
+        return telegramBotConfigs;
     }
 }
