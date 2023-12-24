@@ -14,8 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class NomStickerGenerator extends StickerGenerator {
-    public static final String TEMPLATE_NOM_STICKER = "templates/r_NomStickerMGF.XLT";
-
     public NomStickerGenerator(ConfigurableApplicationContext configurableApplicationContext) throws IOException {
         super(configurableApplicationContext.getResource("classpath:/" + TEMPLATE_NOM_STICKER).getInputStream());
     }

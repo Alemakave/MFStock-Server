@@ -17,7 +17,7 @@ public class TableRow {
         return cells;
     }
 
-    protected void setCells(List<TableCell> cells) {
+    public void setCells(List<TableCell> cells) {
         this.cells = cells;
     }
 

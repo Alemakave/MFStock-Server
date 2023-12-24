@@ -10,11 +10,12 @@
 		<div id="header">
 			<a class="header-element" href="/mfstock-generate-nom-sticker">Генератор наклеек на продукцию</a>
 			<a class="header-element selected">Генератор наклеек с СНИ на продукцию</a>
+			<a class="header-element" href="/mfstock-generate-cell-sticker">Генератор наклеек ячеек</a>
 			<a class="header-element empty"></a>
 			<a class="header-element empty"></a>
 			<a class="header-element empty"></a>
-			<div class="header-element" style="width: 50px;background: black;max-width: 50px;">
-				<div style="background: white;width: 42px;height: 42px;margin: 4px;border-radius: 50%;"></div>
+			<div class="header-element profile">
+				<div class="profile-icon"></div>
 			</div>
 		</div>
 		<div id="base-block">
@@ -23,13 +24,13 @@
 					<div class="label" name="nom-name">Наименование:</div>
 					<div class="label" name="nom-code">Код товара:</div>
 					<div class="label" name="nom-ser-num">СНИ:</div>
-					<div class="label" name="sticker-copies">Напечатать количество:</div>
+					<div class="label" name="sticker-copies" style="display: none;">Напечатать количество:</div>
 				</div>
 				<div id="sticker-input-block">
 					<input class="input" id="input-nom-name">
 					<input class="input" id="input-nom-code">
 					<input class="input" id="input-nom-serial">
-					<input class="input" id="input-sticker-copies" name="input-sticker-copies" type="number" min="1" value="1">
+					<input class="input" id="input-sticker-copies" name="input-sticker-copies" type="number" min="1" value="1" style="display: none;">
 				</div>
 			</div>
 			<div id="sticker-buttons-block">

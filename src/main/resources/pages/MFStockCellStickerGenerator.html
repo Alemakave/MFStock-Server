@@ -3,15 +3,14 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>NomGenerator</title>
-		<script type="text/javascript" src="/get-script?name=NomGenerateSender.js"></script>
+		<script type="text/javascript" src="/get-script?name=CellGenerateSender.js"></script>
 		<link rel="stylesheet" href="/get-style?name=generator.css">
 	</head>
 	<body>
 		<div id="header">
-			<a class="header-element selected">Генератор наклеек на продукцию</a>
+			<a class="header-element" href="/mfstock-generate-nom-sticker">Генератор наклеек на продукцию</a>
 			<a class="header-element" href="/mfstock-generate-nom-ser-sticker">Генератор наклеек с СНИ на продукцию</a>
-			<a class="header-element" href="/mfstock-generate-cell-sticker">Генератор наклеек ячеек</a>
-			<a class="header-element empty"></a>
+			<a class="header-element selected">Генератор наклеек ячеек</a>
 			<a class="header-element empty"></a>
 			<a class="header-element empty"></a>
 			<div class="header-element profile">
@@ -21,19 +20,17 @@
 		<div id="base-block">
 			<div id="sticker-block">
 				<div id="sticker-label-block">
-					<div class="label" name="nom-name">Наименование:</div>
-					<div class="label" name="nom-code">Код товара:</div>
-					<div class="label" name="sticker-copies">Напечатать количество:</div>
+					<div class="label" name="cell-address">Адрес ячейки:</div>
+					<div class="label" name="cell-code">Код ячейки:</div>
 				</div>
 				<div id="sticker-input-block">
-					<input class="input" id="input-nom-name">
-					<input class="input" id="input-nom-code">
-					<input class="input" id="input-sticker-copies" name="input-sticker-copies" type="number" min="1" value="1">
+					<input class="input" id="input-cell-address">
+					<input class="input" id="input-cell-code">
 				</div>
 			</div>
 			<div id="sticker-buttons-block">
 				<div style="width: 100%;"></div>
-				<button id="print-button" onclick="mfstockGenerateNomSticker();">Печать</button>
+				<button id="print-button" onclick="mfstockGenerateCellSticker();">Печать</button>
 			</div>
 			<script type="text/javascript">
 				const inputs = document.getElementsByClassName("input");

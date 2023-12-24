@@ -11,6 +11,7 @@ import ru.alemakave.mfstock.configs.model.DBConfigsColumns;
 import ru.alemakave.mfstock.configs.service.MFStockConfigLoader;
 import ru.alemakave.mfstock.exceptions.DBException;
 import ru.alemakave.mfstock.model.table.Table;
+import ru.alemakave.mfstock.model.table.TableCell;
 import ru.alemakave.mfstock.model.table.TableRow;
 import ru.alemakave.mfstock.utils.PageUtils;
 import ru.alemakave.mfstock.utils.TableUtils;
@@ -20,10 +21,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DBServiceImpl implements IDBService {
     private static final String CLOSE_DB_PAGE_RESOURCE_PATH = "classpath:/pages/MFStockCloseDBStatus.html";
+    private static final String LOAD_DB_PAGE_RESOURCE_PATH = "classpath:/pages/MFStockLoadDBStatus.html";
 
     private final Logger logger = LoggerFactory.getLogger(DBServiceImpl.class);
 
@@ -56,8 +59,15 @@ public class DBServiceImpl implements IDBService {
     }
 
     @Override
+    public String reloadDB() {
+        loadDB();
+        return PageUtils.getPage(configurableApplicationContext.getResource(LOAD_DB_PAGE_RESOURCE_PATH));
+    }
+
+    @Override
     public String findFromScan(String searchString) {
         try {
+            searchString = searchString.strip();
             logger.info("Search string: " + searchString);
             List<TableRow> rows = new ArrayList<>();
             rows.add(getDB().getRows().get(0));
@@ -96,9 +106,42 @@ public class DBServiceImpl implements IDBService {
                 database.saveColumnsAccordingHeaders(configsColumns);
                 database.addColumnPrefix(configsColumns);
             }
+            calculateCellValue();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void calculateCellValue() {
+        List<TableRow> rows = database.getRows();
+
+        int nomCodeIndex = rows.get(0).getCells().indexOf(new TableCell("Номенклатурный код"));  //0;
+        int nomSerIndex = rows.get(0).getCells().indexOf(new TableCell("Серийный Номер Изг."));  //3;
+        int nomCountIndex = rows.get(0).getCells().indexOf(new TableCell("Кол-во"));             //4;
+        int nomCellAddressIndex = rows.get(0).getCells().indexOf(new TableCell("Номер ячейки")); //6;
+
+        for (int i = 0; i < rows.size(); i++) {
+            for (int j = i+1; j < rows.size(); j++) {
+                List<TableCell> cells1 = rows.get(i).getCells();
+                List<TableCell> cells2 = rows.get(j).getCells();
+                if (cells1 == null || cells2 == null) {
+                    continue;
+                }
+
+                if (cells1.get(nomCodeIndex).equals(cells2.get(nomCodeIndex))
+                        && cells1.get(nomSerIndex).equals(cells2.get(nomSerIndex))
+                        && cells1.get(nomCellAddressIndex).equals(cells2.get(nomCellAddressIndex))) {
+                    TableCell countCell = cells1.get(nomCountIndex);
+                    countCell.setValue(Integer.toString(Integer.parseInt(countCell.getValue()) + Integer.parseInt(cells2.get(nomCountIndex).getValue())));
+                    rows.get(j).setCells(null);
+                }
+            }
+        }
+
+        database.setRows(rows.stream()
+                .filter(tableRow -> tableRow.getCells() != null)
+                .collect(Collectors.toList())
+        );
     }
 
     @PostConstruct
