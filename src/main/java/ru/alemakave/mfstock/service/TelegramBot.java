@@ -8,8 +8,10 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.alemakave.mfstock.configs.model.TelegramBotConfigs;
 import ru.alemakave.mfstock.model.telegram_bot.TelegramCachePhotoFilesManager;
 
+import java.io.File;
 import java.util.List;
 
+import static ru.alemakave.mfstock.utils.TelegramBotUtils.sendImageMessage;
 import static ru.alemakave.mfstock.utils.TelegramBotUtils.startCommandReceived;
 
 @Component
@@ -38,18 +40,21 @@ public class TelegramBot extends TelegramLongPollingBot {
 
                 if (messageText.equalsIgnoreCase("/start")) {
                     startCommandReceived(this, chatId, update.getMessage().getChat().getFirstName());
+                } else if (messageText.equalsIgnoreCase("/get-photos")) {
+                    for (File image : telegramCachePhotoFilesManager.getTempNomPhotoFiles()){
+                        sendImageMessage(this, chatId, image);
+                    }
                 }
             }
             if (update.getMessage().hasPhoto()) {
                 List<PhotoSize> photoDataList = update.getMessage().getPhoto();
-                for (PhotoSize photoData : photoDataList) {
-                    GetFile getFile = new GetFile(photoData.getFileId());
-                    try {
-                        org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
-                        telegramCachePhotoFilesManager.downloadPhotoFile(this, file);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
+                PhotoSize photoData = photoDataList.get(photoDataList.size() - 1);
+                GetFile getFile = new GetFile(photoData.getFileId());
+                try {
+                    org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
+                    telegramCachePhotoFilesManager.downloadPhotoFile(this, file);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
             }
         }
