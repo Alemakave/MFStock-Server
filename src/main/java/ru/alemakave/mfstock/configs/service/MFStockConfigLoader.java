@@ -2,16 +2,18 @@ package ru.alemakave.mfstock.configs.service;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import ru.alemakave.mfstock.configs.model.DBConfigs;
 import ru.alemakave.mfstock.configs.model.MFStockConfig;
-import ru.alemakave.mfstock.configs.model.TelergamBotConfigs;
+import ru.alemakave.mfstock.configs.model.TelegramBotConfigs;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.*;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
 
@@ -19,12 +21,15 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 @Scope(scopeName = SCOPE_SINGLETON)
 public class MFStockConfigLoader {
     public static final String PROPERTIES_FILE_PATH = "./MFStockServer.json";
+    private final Map<String, Object> configs = new HashMap<>();
     private MFStockConfig mfStockConfig;
-    private TelergamBotConfigs telegramBotConfigs;
+    private TelegramBotConfigs telegramBotConfigs;
 
-    public MFStockConfigLoader(ConfigurableApplicationContext configurableApplicationContext, MFStockConfig mfStockConfig, TelergamBotConfigs telegramBotConfigs) {
+    public MFStockConfigLoader(ConfigurableApplicationContext configurableApplicationContext, MFStockConfig mfStockConfig, TelegramBotConfigs telegramBotConfigs) {
         this.mfStockConfig = mfStockConfig;
         this.telegramBotConfigs = telegramBotConfigs;
+        putConfig(mfStockConfig);
+        putConfig(telegramBotConfigs);
         checkFileAndCreateIfNotFound();
         load(configurableApplicationContext);
     }
@@ -32,11 +37,22 @@ public class MFStockConfigLoader {
     private void checkFileAndCreateIfNotFound() {
         File propertiesFile = new File(PROPERTIES_FILE_PATH);
         if (!propertiesFile.exists()) {
-            mfStockConfig.setDBConfigs(new DBConfigs());
+            ((MFStockConfig)configs.get(mfStockConfig.getClass().getName())).setDBConfigs(new DBConfigs());
             try {
-                new ObjectMapper()
+                ObjectMapper objectMapper = new ObjectMapper();
+                ObjectNode resultNode = objectMapper.createObjectNode();
+
+                for (Object object : configs.values()) {
+                    ObjectNode objectNode = objectMapper.valueToTree(object);
+                    objectNode.fields().forEachRemaining(
+                            stringJsonNodeEntry -> resultNode.set(stringJsonNodeEntry.getKey(), stringJsonNodeEntry.getValue())
+                    );
+                }
+
+
+                objectMapper
                         .writerWithDefaultPrettyPrinter()
-                        .writeValue(new File(PROPERTIES_FILE_PATH), mfStockConfig);
+                        .writeValue(new File(PROPERTIES_FILE_PATH), resultNode);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -50,10 +66,10 @@ public class MFStockConfigLoader {
                     .disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES)
                     .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                     .readValue(resource.getInputStream(), MFStockConfig.class);
-            TelergamBotConfigs telegramBotConfigs = new ObjectMapper()
+            TelegramBotConfigs telegramBotConfigs = new ObjectMapper()
                     .disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES)
                     .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                    .readValue(resource.getInputStream(), TelergamBotConfigs.class);
+                    .readValue(resource.getInputStream(), TelegramBotConfigs.class);
 
             this.mfStockConfig.setDBConfigs(mfStockConfig.getDBConfigs());
             this.mfStockConfig.setPrinterName(mfStockConfig.getPrinterName());
@@ -65,11 +81,15 @@ public class MFStockConfigLoader {
         }
     }
 
+    private void putConfig(Object config) {
+        configs.put(config.getClass().getName(), config);
+    }
+
     public MFStockConfig getMfStockConfig() {
         return mfStockConfig;
     }
 
-    public TelergamBotConfigs getTelegramBotConfigs() {
+    public TelegramBotConfigs getTelegramBotConfigs() {
         return telegramBotConfigs;
     }
 }

@@ -7,7 +7,7 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 
 @Component
 @Scope(scopeName = SCOPE_SINGLETON)
-public class TelergamBotConfigs {
+public class TelegramBotConfigs {
     private String botName;
     private String botToken;
 

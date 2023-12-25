@@ -3,15 +3,15 @@ package ru.alemakave.mfstock.service;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.alemakave.mfstock.configs.model.TelergamBotConfigs;
+import ru.alemakave.mfstock.configs.model.TelegramBotConfigs;
 
 import static ru.alemakave.mfstock.utils.TelegramBotUtils.startCommandReceived;
 
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
-    private final TelergamBotConfigs botConfigs;
+    private final TelegramBotConfigs botConfigs;
 
-    public TelegramBot(TelergamBotConfigs botConfigs) {
+    public TelegramBot(TelegramBotConfigs botConfigs) {
         super(botConfigs.getBotToken());
         this.botConfigs = botConfigs;
     }
