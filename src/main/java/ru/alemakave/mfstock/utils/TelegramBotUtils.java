@@ -14,30 +14,31 @@ import java.util.List;
 
 public class TelegramBotUtils {
     public static void startCommandReceived(TelegramLongPollingBot telegramLongPollingBot, Long chatId, String name) {
-        String answer = "Привет " + name + ".\n Введи код сотрудника под которым работаешь (код можно узнать отсканировав бейдж сотрудника)";
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId);
-        message.setText(answer);
+        String message = "Приветствую " + name + ".\nВведите код сотрудника под которым работаете (код можно узнать отсканировав бейдж сотрудника)";
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
+        sendMessage.setText(message);
 
-        message.setReplyMarkup(null);
-        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboard = new ArrayList<>();
-        KeyboardRow row1 = new KeyboardRow();
-        row1.add("/get-photos");
-        row1.add("Row 1 Button 2");
-        row1.add("Row 1 Button 3");
-        keyboard.add(row1);
-        KeyboardRow row2 = new KeyboardRow();
-        row2.add("Row 2 Button 1");
-        row2.add("Row 2 Button 2");
-        row2.add("Row 2 Button 3");
-        keyboard.add(row2);
-        keyboardMarkup.setKeyboard(keyboard);
-        keyboardMarkup.setResizeKeyboard(true);
-        message.setReplyMarkup(keyboardMarkup);
+        sendMessage.setReplyMarkup(null);
 
         try {
-            telegramLongPollingBot.execute(message);
+            telegramLongPollingBot.execute(sendMessage);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void sendUnregisteredMessage(TelegramLongPollingBot telegramLongPollingBot, Long chatId) {
+        String message = "Вы не зарегистрированы. \nВведите код сотрудника под которым работаете (код можно узнать отсканировав бейдж сотрудника)";
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
+        sendMessage.setText(message);
+
+        sendMessage.setReplyMarkup(null);
+        sendMessage.setReplyMarkup(getReplyKeyboard());
+
+        try {
+            telegramLongPollingBot.execute(sendMessage);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
@@ -54,5 +55,39 @@ public class TelegramBotUtils {
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void sendMessage(TelegramLongPollingBot telegramLongPollingBot, Long chatId, String message) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
+        sendMessage.setText(message);
+
+        sendMessage.setReplyMarkup(null);
+        sendMessage.setReplyMarkup(getReplyKeyboard());
+
+        try {
+            telegramLongPollingBot.execute(sendMessage);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static ReplyKeyboardMarkup getReplyKeyboard() {
+        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> keyboard = new ArrayList<>();
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add("/get-photos");
+        row1.add("Row 1 Button 2");
+        row1.add("Row 1 Button 3");
+        keyboard.add(row1);
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add("Row 2 Button 1");
+        row2.add("Row 2 Button 2");
+        row2.add("Row 2 Button 3");
+        keyboard.add(row2);
+        keyboardMarkup.setKeyboard(keyboard);
+        keyboardMarkup.setResizeKeyboard(true);
+
+        return keyboardMarkup;
     }
 }
