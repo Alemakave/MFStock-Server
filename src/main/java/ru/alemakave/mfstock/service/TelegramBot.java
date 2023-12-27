@@ -7,7 +7,7 @@ import ru.alemakave.mfstock.configs.model.TelegramBotConfigs;
 import ru.alemakave.mfstock.model.telegram_bot.TGUserJson;
 import ru.alemakave.mfstock.model.telegram_bot.TelegramCachePhotoFilesManager;
 import ru.alemakave.mfstock.model.telegram_bot.UserManager;
-import ru.alemakave.mfstock.model.telegram_bot.actions.ITelegramReceiveAction;
+import ru.alemakave.telegram_bot_utils.actions.ITelegramReceiveAction;
 import ru.alemakave.mfstock.model.telegram_bot.actions.ReceiveNomenclaturePhotoAction;
 
 import java.io.File;

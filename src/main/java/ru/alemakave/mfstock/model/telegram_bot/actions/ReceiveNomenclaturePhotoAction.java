@@ -6,6 +6,7 @@ import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.alemakave.mfstock.model.telegram_bot.TelegramCachePhotoFilesManager;
 import ru.alemakave.mfstock.service.TelegramBot;
+import ru.alemakave.telegram_bot_utils.actions.TelegramReceivePhotoAction;
 
 import java.util.List;
 
