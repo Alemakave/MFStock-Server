@@ -1,6 +1,8 @@
 package ru.alemakave.mfstock.model.table;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +13,11 @@ public class TableRow {
 
     public TableRow() {
         this.cells = new ArrayList<>();
+    }
+
+    @JsonCreator
+    public TableRow(@JsonProperty("cells") List<TableCell> cells) {
+        this.cells = cells;
     }
 
     public List<TableCell> getCells() {

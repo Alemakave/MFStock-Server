@@ -1,5 +1,7 @@
 package ru.alemakave.mfstock.model.table;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -21,7 +23,8 @@ public class Table {
     private DateTimeJson databaseDate = null;
     private List<TableRow> rows;
 
-    public Table(List<TableRow> rows) {
+    @JsonCreator
+    public Table(@JsonProperty("rows") List<TableRow> rows) {
         this.rows = rows;
     }
 

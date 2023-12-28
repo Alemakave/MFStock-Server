@@ -23,12 +23,14 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final TelegramCachePhotoFilesManager telegramCachePhotoFilesManager;
     private final UserManager userManager;
     private final ArrayList<ITelegramReceiveAction> actions = new ArrayList<>();
+    private final DBServiceImpl dbService;
 
-    public TelegramBot(TelegramBotConfigs botConfigs, TelegramCachePhotoFilesManager telegramCachePhotoFilesManager, UserManager userManager) {
+    public TelegramBot(TelegramBotConfigs botConfigs, TelegramCachePhotoFilesManager telegramCachePhotoFilesManager, UserManager userManager, DBServiceImpl dbService) {
         super(botConfigs.getBotToken());
         this.botConfigs = botConfigs;
         this.telegramCachePhotoFilesManager = telegramCachePhotoFilesManager;
         this.userManager = userManager;
+        this.dbService = dbService;
         initActions();
     }
 
@@ -97,6 +99,6 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void initActions() {
-        actions.add(new ReceiveNomenclaturePhotoAction(telegramCachePhotoFilesManager, this));
+        actions.add(new ReceiveNomenclaturePhotoAction(telegramCachePhotoFilesManager, this, dbService));
     }
 }

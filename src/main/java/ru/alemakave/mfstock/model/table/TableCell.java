@@ -1,11 +1,15 @@
 package ru.alemakave.mfstock.model.table;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Objects;
 
 public class TableCell {
     private String value;
 
-    public TableCell(String value) {
+    @JsonCreator
+    public TableCell(@JsonProperty("value") String value) {
         this.value = value;
     }
 

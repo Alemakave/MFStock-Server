@@ -38,7 +38,7 @@ public class TelegramCachePhotoFilesManager {
         tempNomPhotoFiles.put(FileUtils.getFileNameWithoutExtention(file.getName()), file);
     }
 
-    public void downloadPhotoFile(DefaultAbsSender bot, org.telegram.telegrambots.meta.api.objects.File file) throws Exception {
+    public File downloadPhotoFile(DefaultAbsSender bot, org.telegram.telegrambots.meta.api.objects.File file) throws Exception {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
         LocalDateTime now = LocalDateTime.now();
 
@@ -56,6 +56,8 @@ public class TelegramCachePhotoFilesManager {
         if (tempFile.exists()) {
             addTempPhotoFile(tempFile);
         }
+
+        return tempFile;
     }
 
     public File getTempPhotoFile(String date) {
@@ -86,5 +88,21 @@ public class TelegramCachePhotoFilesManager {
             }
         });
         pathStream.close();
+    }
+
+    //FIXME: КОД ГОВНО!!!
+    public void moveFromTemp(File tmpFile, String nomCode) {
+        String destFileName = FileUtils.getFileNameWithoutExtention(tmpFile.getName()).substring(9);
+        destFileName = destFileName.substring(0, destFileName.length()-4);
+
+        int photoNumber = 1;
+        while (Files.exists(Path.of(photoCacheDir, nomCode + "_" + photoNumber + ".jpg"))) {
+            photoNumber++;
+        }
+
+        System.out.println(destFileName);
+        System.out.println(nomCode + "_" + photoNumber + ".jpg");
+
+        tmpFile.renameTo(new File(tmpFile.getParentFile(), nomCode + "_" + photoNumber + ".jpg"));
     }
 }
