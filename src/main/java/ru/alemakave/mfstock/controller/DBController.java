@@ -1,5 +1,7 @@
 package ru.alemakave.mfstock.controller;
 
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.alemakave.mfstock.service.IDBService;
@@ -30,5 +32,12 @@ public class DBController {
     @GetMapping(path = "/mfstock-reload-db")
     public String reloadDB() {
         return dbService.reloadDB();
+    }
+
+    @GetMapping(path = "/mfstock-get-photo")
+    public ResponseEntity<byte[]> getPhoto(String nomCode) {
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(dbService.getPhoto(nomCode));
     }
 }
