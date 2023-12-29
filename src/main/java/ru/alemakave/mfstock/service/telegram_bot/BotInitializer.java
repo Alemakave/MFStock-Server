@@ -1,4 +1,4 @@
-package ru.alemakave.mfstock.service;
+package ru.alemakave.mfstock.service.telegram_bot;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

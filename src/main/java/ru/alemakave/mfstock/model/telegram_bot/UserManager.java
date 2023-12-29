@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import ru.alemakave.mfstock.service.telegram_bot.TelegramBotReceiveMode;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -16,6 +17,7 @@ import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
 
@@ -45,6 +47,11 @@ public class UserManager {
         return registeredUsers;
     }
 
+    public void setUserModeByChatId(Long chatId, TelegramBotReceiveMode mode) {
+        getUserByTelegramID(chatId).setMode(mode);
+        saveUsers();
+    }
+
     private void saveUsers() {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
@@ -70,5 +77,9 @@ public class UserManager {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public TGUserJson getUserByTelegramID(Long chatId) {
+        return registeredUsers.stream().filter(tgUserJson -> tgUserJson.getTgUserID() == chatId).collect(Collectors.toList()).get(0);
     }
 }

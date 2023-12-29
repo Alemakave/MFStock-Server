@@ -1,4 +1,4 @@
-package ru.alemakave.mfstock.service;
+package ru.alemakave.mfstock.service.telegram_bot;
 
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -7,6 +7,7 @@ import ru.alemakave.mfstock.configs.model.TelegramBotConfigs;
 import ru.alemakave.mfstock.model.telegram_bot.TGUserJson;
 import ru.alemakave.mfstock.model.telegram_bot.TelegramCachePhotoFilesManager;
 import ru.alemakave.mfstock.model.telegram_bot.UserManager;
+import ru.alemakave.mfstock.service.DBServiceImpl;
 import ru.alemakave.telegram_bot_utils.actions.ITelegramReceiveAction;
 import ru.alemakave.mfstock.model.telegram_bot.actions.ReceiveNomenclaturePhotoAction;
 
@@ -87,7 +88,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 final Pattern pattern = Pattern.compile("[0-9]{4}", Pattern.MULTILINE);
                 final Matcher matcher = pattern.matcher(messageText);
                 if (matcher.find()) {
-                    userManager.registryUser(new TGUserJson(chatId, Integer.parseInt(messageText)));
+                    userManager.registryUser(new TGUserJson(chatId, Integer.parseInt(messageText), TelegramBotReceiveMode.NONE));
                     sendMessage(this, chatId, "Вы зарегистрированы!");
                 } else {
                     sendUnregisteredMessage(this, chatId);
@@ -99,6 +100,6 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void initActions() {
-        actions.add(new ReceiveNomenclaturePhotoAction(telegramCachePhotoFilesManager, this, dbService));
+        actions.add(new ReceiveNomenclaturePhotoAction(telegramCachePhotoFilesManager, this, dbService, userManager));
     }
 }

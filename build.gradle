@@ -29,6 +29,7 @@ dependencies {
     implementation files(projectDir.absolutePath + "/src/main/resources/libs/com/jacob/1.20/jacob-1.20-x64.dll")
 
     implementation 'org.telegram:telegrambots:6.5.0'
+    implementation 'com.google.guava:guava:32.1.3-jre'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
