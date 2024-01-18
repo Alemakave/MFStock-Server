@@ -1,4 +1,4 @@
-package ru.alemakave.mfstock.service.telegram_bot;
+package ru.alemakave.mfstock.telegram_bot;
 
 public enum TelegramBotReceiveMode {
     NONE,

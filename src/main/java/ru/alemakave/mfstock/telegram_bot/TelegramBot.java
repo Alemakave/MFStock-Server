@@ -1,4 +1,4 @@
-package ru.alemakave.mfstock.service.telegram_bot;
+package ru.alemakave.mfstock.telegram_bot;
 
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -7,13 +7,11 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.alemakave.mfstock.configs.model.TelegramBotConfigs;
-import ru.alemakave.mfstock.model.telegram_bot.TelegramCachePhotoFilesManager;
-import ru.alemakave.mfstock.model.telegram_bot.UserManager;
-import ru.alemakave.mfstock.model.telegram_bot.actions.GetPhotoTelegramAction;
-import ru.alemakave.mfstock.model.telegram_bot.actions.ReceiveNomenclaturePhotoAction;
-import ru.alemakave.mfstock.model.telegram_bot.actions.RegistrationMessageAction;
+import ru.alemakave.mfstock.model.configs.TelegramBotConfigs;
 import ru.alemakave.mfstock.service.DBServiceImpl;
+import ru.alemakave.mfstock.telegram_bot.actions.GetPhotoTelegramAction;
+import ru.alemakave.mfstock.telegram_bot.actions.ReceiveNomenclaturePhotoAction;
+import ru.alemakave.mfstock.telegram_bot.actions.RegistrationMessageAction;
 import ru.alemakave.telegram_bot_utils.actions.ITelegramReceiveAction;
 import ru.alemakave.telegram_bot_utils.actions.TelegramReceiveMessageAction;
 import ru.alemakave.telegram_bot_utils.actions.TelegramReceivePhotoAction;

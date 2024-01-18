@@ -1,4 +1,4 @@
-package ru.alemakave.mfstock.model.telegram_bot;
+package ru.alemakave.mfstock.telegram_bot;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import ru.alemakave.mfstock.service.telegram_bot.TelegramBotReceiveMode;
+import ru.alemakave.mfstock.model.telegram_bot.TGUserJson;
 
 import javax.annotation.PostConstruct;
 import java.io.File;

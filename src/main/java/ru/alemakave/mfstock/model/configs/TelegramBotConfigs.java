@@ -1,4 +1,4 @@
-package ru.alemakave.mfstock.configs.model;
+package ru.alemakave.mfstock.model.configs;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

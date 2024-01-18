@@ -1,11 +1,11 @@
-package ru.alemakave.mfstock.model.telegram_bot.actions;
+package ru.alemakave.mfstock.telegram_bot.actions;
 
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.alemakave.mfstock.model.telegram_bot.TGUserJson;
-import ru.alemakave.mfstock.model.telegram_bot.UserManager;
-import ru.alemakave.mfstock.service.telegram_bot.TelegramBot;
-import ru.alemakave.mfstock.service.telegram_bot.TelegramBotReceiveMode;
+import ru.alemakave.mfstock.telegram_bot.TelegramBot;
+import ru.alemakave.mfstock.telegram_bot.TelegramBotReceiveMode;
+import ru.alemakave.mfstock.telegram_bot.UserManager;
 import ru.alemakave.telegram_bot_utils.actions.TelegramReceiveMessageAction;
 
 import java.util.regex.Matcher;

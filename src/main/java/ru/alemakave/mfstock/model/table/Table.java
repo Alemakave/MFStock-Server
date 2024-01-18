@@ -6,7 +6,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import ru.alemakave.mfstock.configs.model.DBConfigsColumns;
+import ru.alemakave.mfstock.model.configs.DBConfigsColumns;
 import ru.alemakave.mfstock.model.json.DateTimeJson;
 
 import java.io.File;

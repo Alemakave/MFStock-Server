@@ -1,4 +1,4 @@
-package ru.alemakave.mfstock.model.telegram_bot.actions;
+package ru.alemakave.mfstock.telegram_bot.actions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
@@ -12,10 +12,10 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.alemakave.mfstock.model.table.Table;
 import ru.alemakave.mfstock.model.table.TableCell;
 import ru.alemakave.mfstock.model.table.TableRow;
-import ru.alemakave.mfstock.model.telegram_bot.UserManager;
 import ru.alemakave.mfstock.service.DBServiceImpl;
-import ru.alemakave.mfstock.service.telegram_bot.TelegramBot;
-import ru.alemakave.mfstock.service.telegram_bot.TelegramBotReceiveMode;
+import ru.alemakave.mfstock.telegram_bot.TelegramBot;
+import ru.alemakave.mfstock.telegram_bot.TelegramBotReceiveMode;
+import ru.alemakave.mfstock.telegram_bot.UserManager;
 import ru.alemakave.mfstock.utils.TelegramBotUtils;
 import ru.alemakave.telegram_bot_utils.actions.TelegramReceivePhotoAction;
 

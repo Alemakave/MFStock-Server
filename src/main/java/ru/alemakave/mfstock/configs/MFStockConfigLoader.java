@@ -1,4 +1,4 @@
-package ru.alemakave.mfstock.configs.service;
+package ru.alemakave.mfstock.configs;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,13 +7,14 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-import ru.alemakave.mfstock.configs.model.DBConfigs;
-import ru.alemakave.mfstock.configs.model.MFStockConfig;
-import ru.alemakave.mfstock.configs.model.TelegramBotConfigs;
+import ru.alemakave.mfstock.model.configs.DBConfigs;
+import ru.alemakave.mfstock.model.configs.MFStockConfig;
+import ru.alemakave.mfstock.model.configs.TelegramBotConfigs;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
 

@@ -2,8 +2,8 @@ package ru.alemakave.telegram_bot_utils.actions;
 
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.alemakave.mfstock.model.telegram_bot.TelegramCachePhotoFilesManager;
-import ru.alemakave.mfstock.service.telegram_bot.TelegramBot;
+import ru.alemakave.mfstock.telegram_bot.TelegramBot;
+import ru.alemakave.mfstock.telegram_bot.TelegramCachePhotoFilesManager;
 
 import java.util.ArrayList;
 import java.util.Collections;

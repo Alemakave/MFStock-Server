@@ -1,4 +1,4 @@
-package ru.alemakave.mfstock.service.telegram_bot;
+package ru.alemakave.mfstock.telegram_bot;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
-import ru.alemakave.mfstock.configs.model.TelegramBotConfigs;
+import ru.alemakave.mfstock.model.configs.TelegramBotConfigs;
 
 @Component
 public class BotInitializer {

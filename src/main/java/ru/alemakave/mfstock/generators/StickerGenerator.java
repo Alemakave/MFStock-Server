@@ -1,4 +1,4 @@
-package ru.alemakave.mfstock.model.generators;
+package ru.alemakave.mfstock.generators;
 
 import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
 import org.apache.poi.ss.usermodel.*;

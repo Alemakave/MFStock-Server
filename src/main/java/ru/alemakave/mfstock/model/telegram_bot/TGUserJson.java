@@ -2,7 +2,7 @@ package ru.alemakave.mfstock.model.telegram_bot;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import ru.alemakave.mfstock.service.telegram_bot.TelegramBotReceiveMode;
+import ru.alemakave.mfstock.telegram_bot.TelegramBotReceiveMode;
 
 import java.util.Objects;
 
@@ -33,11 +33,11 @@ public class TGUserJson {
         return mode;
     }
 
-    void setMfUserID(int mfUserID) {
+    public void setMfUserID(int mfUserID) {
         this.mfUserID = mfUserID;
     }
 
-    void setMode(TelegramBotReceiveMode mode) {
+    public void setMode(TelegramBotReceiveMode mode) {
         this.mode = mode;
     }
 

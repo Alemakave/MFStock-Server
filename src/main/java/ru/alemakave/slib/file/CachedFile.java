@@ -1,4 +1,4 @@
-package ru.alemakave.slib;
+package ru.alemakave.slib.file;
 
 import com.google.common.hash.Hashing;
 
@@ -25,6 +25,24 @@ public class CachedFile {
 
     public String getSha() {
         return sha;
+    }
+
+    public String getAbsolutePath() {
+        return file.getAbsolutePath();
+    }
+
+    public String getName() {
+        return file.getName();
+    }
+
+    public File getParentFile() {
+        return file.getParentFile();
+    }
+
+    public void renameTo(File distFile) throws IOException {
+        if (!file.renameTo(file)) {
+            throw new IOException("File not renamed");
+        }
     }
 
     private void calculateHashCode(File file) throws IOException {
