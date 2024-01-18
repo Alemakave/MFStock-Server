@@ -1,5 +1,7 @@
 package ru.alemakave.mfstock.model.telegram_bot;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -26,6 +28,7 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 public class TelegramCachePhotoFilesManager {
     private final Map<String, File> tempNomPhotoFiles = new TreeMap<>();
     private final Map<String, File> nomPhotoFiles = new TreeMap<>();
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Value("${mfstock.photo.cache.path:.}")
     private String photoCacheDir;
@@ -90,7 +93,7 @@ public class TelegramCachePhotoFilesManager {
         pathStream.close();
     }
 
-    //FIXME: КОД ГОВНО!!!
+    //FIXME: Переработать
     public void moveFromTemp(File tmpFile, String nomCode) {
         String destFileName = FileUtils.getFileNameWithoutExtention(tmpFile.getName()).substring(9);
         destFileName = destFileName.substring(0, destFileName.length()-4);
@@ -100,8 +103,8 @@ public class TelegramCachePhotoFilesManager {
             photoNumber++;
         }
 
-        System.out.println(destFileName);
-        System.out.println(nomCode + "_" + photoNumber + ".jpg");
+        logger.debug(destFileName);
+        logger.debug(nomCode + "_" + photoNumber + ".jpg");
 
         tmpFile.renameTo(new File(tmpFile.getParentFile(), nomCode + "_" + photoNumber + ".jpg"));
     }

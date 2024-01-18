@@ -4,4 +4,5 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 public interface ITelegramReceiveAction {
     void call(Update update);
+    void action(Update update);
 }

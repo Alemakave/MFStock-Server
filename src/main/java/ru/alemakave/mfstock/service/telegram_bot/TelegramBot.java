@@ -2,28 +2,34 @@ package ru.alemakave.mfstock.service.telegram_bot;
 
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.alemakave.mfstock.configs.model.TelegramBotConfigs;
-import ru.alemakave.mfstock.model.telegram_bot.TGUserJson;
 import ru.alemakave.mfstock.model.telegram_bot.TelegramCachePhotoFilesManager;
 import ru.alemakave.mfstock.model.telegram_bot.UserManager;
+import ru.alemakave.mfstock.model.telegram_bot.actions.GetPhotoTelegramAction;
+import ru.alemakave.mfstock.model.telegram_bot.actions.ReceiveNomenclaturePhotoAction;
+import ru.alemakave.mfstock.model.telegram_bot.actions.RegistrationMessageAction;
 import ru.alemakave.mfstock.service.DBServiceImpl;
 import ru.alemakave.telegram_bot_utils.actions.ITelegramReceiveAction;
-import ru.alemakave.mfstock.model.telegram_bot.actions.ReceiveNomenclaturePhotoAction;
+import ru.alemakave.telegram_bot_utils.actions.TelegramReceiveMessageAction;
+import ru.alemakave.telegram_bot_utils.actions.TelegramReceivePhotoAction;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static ru.alemakave.mfstock.utils.TelegramBotUtils.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
     private final TelegramBotConfigs botConfigs;
     private final TelegramCachePhotoFilesManager telegramCachePhotoFilesManager;
     private final UserManager userManager;
-    private final ArrayList<ITelegramReceiveAction> actions = new ArrayList<>();
+    private final Map<String, List<ITelegramReceiveAction>> actions = new HashMap<>();
     private final DBServiceImpl dbService;
 
     public TelegramBot(TelegramBotConfigs botConfigs, TelegramCachePhotoFilesManager telegramCachePhotoFilesManager, UserManager userManager, DBServiceImpl dbService) {
@@ -32,6 +38,10 @@ public class TelegramBot extends TelegramLongPollingBot {
         this.telegramCachePhotoFilesManager = telegramCachePhotoFilesManager;
         this.userManager = userManager;
         this.dbService = dbService;
+
+        actions.put(TelegramReceiveMessageAction.class.getName(), new ArrayList<>());
+        actions.put(TelegramReceivePhotoAction.class.getName(), new ArrayList<>());
+
         initActions();
     }
 
@@ -43,63 +53,55 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         // Работа бота тутъ
+        if (update.hasCallbackQuery()) {
+            CallbackQuery callbackQuery = update.getCallbackQuery();
+
+            AnswerCallbackQuery answerCallback = new AnswerCallbackQuery();
+            answerCallback.setCallbackQueryId(callbackQuery.getId());
+            callbackQuery.getMessage().setReplyMarkup(null);
+
+            try {
+                execute(answerCallback);
+                String[] data = callbackQuery.getData().split("->");
+                String fileAbsolutePath = data[0];
+                String nomCode = data[1];
+
+                EditMessageText editMessageText = new EditMessageText();
+                editMessageText.setChatId(callbackQuery.getMessage().getChatId());
+                editMessageText.setMessageId(callbackQuery.getMessage().getMessageId());
+                telegramCachePhotoFilesManager.moveFromTemp(new File(fileAbsolutePath), nomCode);
+                editMessageText.setText("Прикреплено к " + nomCode);
+
+                execute(editMessageText);
+            } catch (TelegramApiException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         if (update.hasMessage()) {
-            long chatId = update.getMessage().getChatId();
-            if (userManager.isRegisteredUserByChatId(chatId)) {
-                onRegisteredUserReceivedMessage(update);
-            } else {
-                onNotRegisteredUserReceivedMessage(update);
-            }
-        }
-    }
-
-    private void onRegisteredUserReceivedMessage(Update update) {
-        long chatId = update.getMessage().getChatId();
-
-        if (update.getMessage().hasText()) {
-            String messageText = update.getMessage().getText();
-            if (messageText.equalsIgnoreCase("/get-photos")) {
-                for (File image : telegramCachePhotoFilesManager.getTempNomPhotoFiles()) {
-                    sendImageMessage(this, chatId, image);
-                }
-            }
-        }
-
-        for (ITelegramReceiveAction action : actions) {
             if (update.getMessage().hasPhoto()) {
-                if (action.getClass().equals(ReceiveNomenclaturePhotoAction.class)) {
-                    action.call(update);
-                }
+                actions.get(TelegramReceivePhotoAction.class.getName()).forEach(action -> action.call(update));
+            } else if (update.getMessage().hasText()) {
+                actions.get(TelegramReceiveMessageAction.class.getName()).forEach(action -> action.call(update));
             }
-        }
-    }
-
-    private void onNotRegisteredUserReceivedMessage(Update update) {
-        long chatId = update.getMessage().getChatId();
-
-        if (update.getMessage().hasText()) {
-            String messageText = update.getMessage().getText();
-            if (messageText.equalsIgnoreCase("/start")) {
-                startCommandReceived(this, chatId, update.getMessage().getChat().getFirstName());
-            } else {
-                if (messageText.startsWith("E-")) {
-                    messageText = messageText.substring(2);
-                }
-                final Pattern pattern = Pattern.compile("[0-9]{4}", Pattern.MULTILINE);
-                final Matcher matcher = pattern.matcher(messageText);
-                if (matcher.find()) {
-                    userManager.registryUser(new TGUserJson(chatId, Integer.parseInt(messageText), TelegramBotReceiveMode.NONE));
-                    sendMessage(this, chatId, "Вы зарегистрированы!");
-                } else {
-                    sendUnregisteredMessage(this, chatId);
-                }
-            }
-        } else {
-            sendUnregisteredMessage(this, chatId);
         }
     }
 
     private void initActions() {
-        actions.add(new ReceiveNomenclaturePhotoAction(telegramCachePhotoFilesManager, this, dbService, userManager));
+        addAction(new ReceiveNomenclaturePhotoAction(this, dbService, userManager));
+        addAction(new RegistrationMessageAction(this, userManager));
+        addAction(new GetPhotoTelegramAction(this));
+    }
+
+    public void addAction(ITelegramReceiveAction action) {
+        if (action instanceof TelegramReceiveMessageAction) {
+            actions.get(TelegramReceiveMessageAction.class.getName()).add(action);
+        } else if (action instanceof TelegramReceivePhotoAction) {
+            actions.get(TelegramReceivePhotoAction.class.getName()).add(action);
+        }
+    }
+
+    public TelegramCachePhotoFilesManager getPhotoCache() {
+        return telegramCachePhotoFilesManager;
     }
 }
