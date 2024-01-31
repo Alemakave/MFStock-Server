@@ -1,5 +1,6 @@
 package ru.alemakave.mfstock.configs.service;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Scope;
@@ -42,9 +43,13 @@ public class MFStockConfigLoader {
     private void load(ConfigurableApplicationContext configurableApplicationContext) {
         Resource resource = configurableApplicationContext.getResource("file:" + PROPERTIES_FILE_PATH);
         try {
-            MFStockConfig loadedConfig = new ObjectMapper().readValue(resource.getInputStream(), MFStockConfig.class);
-            mfStockConfig.setPrinterName(loadedConfig.getPrinterName());
-            mfStockConfig.setDBConfigs(loadedConfig.getDBConfigs());
+            MFStockConfig mfStockConfig = new ObjectMapper()
+                    .disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES)
+                    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                    .readValue(resource.getInputStream(), MFStockConfig.class);
+
+            this.mfStockConfig.setDBConfigs(mfStockConfig.getDBConfigs());
+            this.mfStockConfig.setPrinterName(mfStockConfig.getPrinterName());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

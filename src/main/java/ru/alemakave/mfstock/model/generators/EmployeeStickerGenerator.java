@@ -26,7 +26,7 @@ public class EmployeeStickerGenerator extends StickerGenerator {
 
         Map<Object, Object> dataMap = new HashMap<>();
         dataMap.put(new CellRangeAddress(2, 4, 3, 4), ImageUtils.toByteArray(QRGenerator.generateToBufferedImage(employeeCode), ImageType.PNG.name()));
-        dataMap.put(new CellAddress(1, 3), employeeName);
+        dataMap.put(new CellAddress(1, 0), employeeName);
         dataMap.put(new CellAddress(4, 3), "Пароль:" + employeePass);
 
         super.generate(outputFile, dataMap);
