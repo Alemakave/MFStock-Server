@@ -50,6 +50,15 @@ public class StickerController {
         }
     }
 
+    @GetMapping(path = "/mfstock-generate-employee-sticker")
+    public String getEmployeeStickerGenerator() {
+        try {
+            return generatorService.getEmployeeStickerGenerator();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @PostMapping(path = "/mfstock-generate-nom-ser-sticker", consumes = "application/json")
     public String postNomSerStickerGenerator(@RequestBody String requestBody) {
         return generatorService.postNomSerStickerGenerator(requestBody);
@@ -63,6 +72,11 @@ public class StickerController {
     @PostMapping(path = "/mfstock-generate-cell-sticker", consumes = "application/json")
     public String postCellStickerGenerator(@RequestBody String requestBody) {
         return generatorService.postCellStickerGenerator(requestBody);
+    }
+
+    @PostMapping(path = "/mfstock-generate-employee-sticker", consumes = "application/json")
+    public String postEmployeeStickerGenerator(@RequestBody String requestBody) {
+        return generatorService.postEmployeeStickerGenerator(requestBody);
     }
 
     @ExceptionHandler({RuntimeException.class})

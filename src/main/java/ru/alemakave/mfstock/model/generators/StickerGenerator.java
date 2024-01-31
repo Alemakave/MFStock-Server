@@ -12,6 +12,7 @@ public abstract class StickerGenerator {
     public static final String TEMPLATE_NOM_STICKER = "templates/r_NomStickerMGF.XLT";
     public static final String TEMPLATE_NOM_SER_STICKER = "templates/r_NomSerStickerMGF.XLT";
     public static final String TEMPLATE_CELL_STICKER = "templates/r_CellSticker.XLT";
+    public static final String TEMPLATE_EMPLOYEE_STICKER = TEMPLATE_CELL_STICKER;
 
     private final InputStream stickerTemplateInputStream;
 

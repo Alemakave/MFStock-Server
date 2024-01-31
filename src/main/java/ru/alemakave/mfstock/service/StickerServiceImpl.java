@@ -8,9 +8,11 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Service;
 import ru.alemakave.mfstock.configs.service.MFStockConfigLoader;
 import ru.alemakave.mfstock.model.generators.CellStickerGenerator;
+import ru.alemakave.mfstock.model.generators.EmployeeStickerGenerator;
 import ru.alemakave.mfstock.model.generators.NomSerStickerGenerator;
 import ru.alemakave.mfstock.model.generators.NomStickerGenerator;
 import ru.alemakave.mfstock.model.json.CellSticker;
+import ru.alemakave.mfstock.model.json.EmployeeSticker;
 import ru.alemakave.mfstock.model.json.NomSerSticker;
 import ru.alemakave.mfstock.model.json.NomSticker;
 import ru.alemakave.slib.PrintConfigurationBuilder;
@@ -28,6 +30,7 @@ public class StickerServiceImpl implements IStickerService {
     public static final String PAGE_NOM_STICKER_RESOURCE_LOCATION = "classpath:/pages/MFStockNomStickerGenerator.html";
     public static final String PAGE_NOM_SER_STICKER_RESOURCE_LOCATION = "classpath:pages/MFStockNomSerStickerGenerator.html";
     public static final String PAGE_CELL_STICKER_RESOURCE_LOCATION = "classpath:pages/MFStockCellStickerGenerator.html";
+    public static final String PAGE_EMPLOYEE_STICKER_RESOURCE_LOCATION = "classpath:pages/MFStockEmployeeStickerGenerator.html";
     public static final String HOME_PAGE_RESOURCE_LOCATION = "classpath:pages/MFStockHome.html";
     private static final Logger log = LoggerFactory.getLogger(StickerServiceImpl.class);
     private final MFStockConfigLoader configLoader;
@@ -127,6 +130,36 @@ public class StickerServiceImpl implements IStickerService {
             final File stickerTempFile = new File(stickerTempFileName);
             CellStickerGenerator nomSerStickerGenerator = new CellStickerGenerator(context);
             nomSerStickerGenerator.generate(stickerTempFile, dta.getCellAddress(), dta.getCellCode());
+            ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(configLoader.getMfStockConfig().getPrinterName());
+            printConfiguration.setCopies(1);
+            PrintUtils.printFile(stickerTempFile, printConfiguration);
+            //noinspection ResultOfMethodCallIgnored
+            stickerTempFile.delete();
+        } catch (IOException | PrintException | WriterException e) {
+            throw new RuntimeException(e);
+        }
+        return requestBody;
+    }
+
+    @Override
+    public String getEmployeeStickerGenerator() throws IOException {
+        try (InputStream pageEmployeeStickerInputStream = context.getResource(PAGE_EMPLOYEE_STICKER_RESOURCE_LOCATION).getInputStream()) {
+            try (BufferedInputStream bufferedPageNomSerStickerInputStream = new BufferedInputStream(pageEmployeeStickerInputStream)) {
+                return new String(bufferedPageNomSerStickerInputStream.readAllBytes());
+            }
+        }
+    }
+
+    @Override
+    public String postEmployeeStickerGenerator(String requestBody) {
+        log.info(String.format("postEmployeeStickerGenerator(%s)", requestBody));
+        final String stickerTempFileName = "employee_sticker.xlt";
+        final ObjectMapper mapper = new ObjectMapper();
+        try {
+            final EmployeeSticker stickerData = mapper.readValue(requestBody, EmployeeSticker.class);
+            final File stickerTempFile = new File(stickerTempFileName);
+            EmployeeStickerGenerator employeeStickerGenerator = new EmployeeStickerGenerator(context);
+            employeeStickerGenerator.generate(stickerTempFile, stickerData);
             ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(configLoader.getMfStockConfig().getPrinterName());
             printConfiguration.setCopies(1);
             PrintUtils.printFile(stickerTempFile, printConfiguration);
