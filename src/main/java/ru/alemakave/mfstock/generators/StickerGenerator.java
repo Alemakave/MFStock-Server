@@ -1,4 +1,4 @@
-package ru.alemakave.mfstock.model.generators;
+package ru.alemakave.mfstock.generators;
 
 import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
 import org.apache.poi.ss.usermodel.*;
@@ -11,6 +11,7 @@ import java.util.Map;
 public abstract class StickerGenerator {
     public static final String TEMPLATE_NOM_STICKER = "templates/r_NomStickerMGF.XLT";
     public static final String TEMPLATE_NOM_SER_STICKER = "templates/r_NomSerStickerMGF.XLT";
+    public static final String TEMPLATE_NOM_PARTY_STICKER = "templates/r_NomPartyStickerMGF.XLT";
     public static final String TEMPLATE_CELL_STICKER = "templates/r_CellSticker.XLT";
     public static final String TEMPLATE_EMPLOYEE_STICKER = "templates/r_EmployeeSticker.XLT";
 
