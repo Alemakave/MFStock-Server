@@ -14,4 +14,6 @@ public interface IStickerService {
     String postCellStickerGenerator(@RequestBody String requestBody);
     String getEmployeeStickerGenerator() throws IOException;
     String postEmployeeStickerGenerator(@RequestBody String requestBody);
+    String getNomPartyStickerGenerator() throws IOException;
+    String postNomPartyStickerGenerator(@RequestBody String requestBody);
 }
