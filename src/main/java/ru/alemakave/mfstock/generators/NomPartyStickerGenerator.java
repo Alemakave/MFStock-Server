@@ -4,6 +4,7 @@ import com.google.zxing.WriterException;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.springframework.context.ConfigurableApplicationContext;
+import ru.alemakave.mfstock.model.json.NomPartySticker;
 import ru.alemakave.qr.ImageType;
 import ru.alemakave.qr.generator.QRGenerator;
 import ru.alemakave.slib.utils.ImageUtils;
@@ -18,7 +19,11 @@ public class NomPartyStickerGenerator extends StickerGenerator {
         super(configurableApplicationContext.getResource("classpath:/" + TEMPLATE_NOM_PARTY_STICKER).getInputStream());
     }
 
-    public void generate(File outputFile, String nomCode, String nomName, String party) throws IOException, WriterException {
+    public void generate(File outputFile, NomPartySticker sticker) throws IOException, WriterException {
+        String nomCode = sticker.getCode();
+        String nomName = sticker.getName();
+        String party = sticker.getParty();
+
         Map<Object, Object> dataMap = new HashMap<>();
 
         dataMap.put(new CellRangeAddress(1, 5, 1, 2), ImageUtils.toByteArray(QRGenerator.generateToBufferedImage(nomCode), ImageType.PNG.name()));

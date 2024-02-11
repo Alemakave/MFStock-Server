@@ -2,16 +2,16 @@
 <html lang="ru">
 	<head>
 		<meta charset="UTF-8">
-		<title>NomSerGenerator</title>
-		<script type="text/javascript" src="/get-script?name=NomSerGenerateSender.js"></script>
+		<title>NomGenerator</title>
+		<script type="text/javascript" src="/get-script?name=EmployeeGenerateSender.js"></script>
 		<link rel="stylesheet" href="/get-style?name=generator.css">
 	</head>
 	<body>
 		<div id="header">
 			<a class="header-element" href="/mfstock-generate-nom-sticker">Генератор наклеек на продукцию</a>
-			<a class="header-element selected">Генератор наклеек с СНИ на продукцию</a>
-			<a class="header-element" href="/mfstock-generate-nom-party-sticker">Генератор наклеек с партией</a>
+			<a class="header-element" href="/mfstock-generate-nom-ser-sticker">Генератор наклеек с СНИ на продукцию</a>
 			<a class="header-element" href="/mfstock-generate-cell-sticker">Генератор наклеек ячеек</a>
+			<a class="header-element selected">Генератор наклеек сотрудников</a>
 			<a class="header-element" href="/mfstock-generate-employee-sticker">Генератор наклеек сотрудников</a>
 			<a class="header-element empty"></a>
 			<div class="header-element profile">
@@ -21,21 +21,19 @@
 		<div id="base-block">
 			<div id="sticker-block">
 				<div id="sticker-label-block">
-					<div class="label" name="nom-name">Наименование:</div>
-					<div class="label" name="nom-code">Код товара:</div>
-					<div class="label" name="nom-ser-num">СНИ:</div>
-					<div class="label" name="sticker-copies" style="display: none;">Напечатать количество:</div>
+					<div class="label" name="employee-name">ФИО:</div>
+					<div class="label" name="employee-code">Код сотрудника:</div>
+					<div class="label" name="employee-pass">Пароль:</div>
 				</div>
 				<div id="sticker-input-block">
-					<input class="input" id="input-nom-name">
-					<input class="input" id="input-nom-code">
-					<input class="input" id="input-nom-serial">
-					<input class="input" id="input-sticker-copies" name="input-sticker-copies" type="number" min="1" value="1" style="display: none;">
+					<input class="input" id="input-employee-name">
+					<input class="input" id="input-employee-code">
+					<input class="input" id="input-employee-pass">
 				</div>
 			</div>
 			<div id="sticker-buttons-block">
 				<div style="width: 100%;"></div>
-				<button id="print-button" onclick="mfstockGenerateNomSerSticker();">Печать</button>
+				<button id="print-button" onclick="mfstockGenerateEmployeeSticker();">Печать</button>
 			</div>
 			<script type="text/javascript">
 				const inputs = document.getElementsByClassName("input");

@@ -6,15 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 import ru.alemakave.mfstock.configs.MFStockConfigLoader;
-import ru.alemakave.mfstock.generators.CellStickerGenerator;
-import ru.alemakave.mfstock.generators.NomPartyStickerGenerator;
-import ru.alemakave.mfstock.generators.NomSerStickerGenerator;
-import ru.alemakave.mfstock.generators.NomStickerGenerator;
-import ru.alemakave.mfstock.model.json.CellSticker;
-import ru.alemakave.mfstock.model.json.NomPartySticker;
-import ru.alemakave.mfstock.model.json.NomSerSticker;
-import ru.alemakave.mfstock.model.json.NomSticker;
+import ru.alemakave.mfstock.generators.*;
+import ru.alemakave.mfstock.model.json.*;
 import ru.alemakave.slib.PrintConfigurationBuilder;
 import ru.alemakave.slib.PrintConfigurationBuilder.ExcelPrintConfiguration;
 import ru.alemakave.slib.utils.PrintUtils;
@@ -29,8 +24,9 @@ import java.io.InputStream;
 public class StickerServiceImpl implements IStickerService {
     public static final String PAGE_NOM_STICKER_RESOURCE_LOCATION = "classpath:/pages/MFStockNomStickerGenerator.html";
     public static final String PAGE_NOM_SER_STICKER_RESOURCE_LOCATION = "classpath:pages/MFStockNomSerStickerGenerator.html";
-    public static final String PAGE_NOM_PARTY_STICKER_RESOURCE_LOCATION = "classpath:pages/MFStockNomPartyStickerGenerator.html";
     public static final String PAGE_CELL_STICKER_RESOURCE_LOCATION = "classpath:pages/MFStockCellStickerGenerator.html";
+    public static final String PAGE_PARTY_STICKER_RESOURCE_LOCATION = "classpath:pages/MFStockNomPartyStickerGenerator.html";
+    public static final String PAGE_EMPLOYEE_STICKER_RESOURCE_LOCATION = "classpath:pages/MFStockEmployeeStickerGenerator.html";
     public static final String HOME_PAGE_RESOURCE_LOCATION = "classpath:pages/MFStockHome.html";
     private static final Logger log = LoggerFactory.getLogger(StickerServiceImpl.class);
     private final MFStockConfigLoader configLoader;
@@ -142,26 +138,56 @@ public class StickerServiceImpl implements IStickerService {
     }
 
     @Override
-    public String getNomPartyGenerator() throws IOException {
-        try (InputStream pageNomSerStickerInputStream = context.getResource(PAGE_NOM_PARTY_STICKER_RESOURCE_LOCATION).getInputStream()) {
-            try (BufferedInputStream bufferedPageNomSerStickerInputStream = new BufferedInputStream(pageNomSerStickerInputStream)) {
+    public String getEmployeeStickerGenerator() throws IOException {
+        try (InputStream pageEmployeeStickerInputStream = context.getResource(PAGE_EMPLOYEE_STICKER_RESOURCE_LOCATION).getInputStream()) {
+            try (BufferedInputStream bufferedPageNomSerStickerInputStream = new BufferedInputStream(pageEmployeeStickerInputStream)) {
                 return new String(bufferedPageNomSerStickerInputStream.readAllBytes());
             }
         }
     }
 
     @Override
-    public String postNomPartyGenerator(String requestBody) {
-        log.info(String.format("postNomPartyGenerator(%s)", requestBody));
-        final String stickerTempFileName = "nom_party_sticker.xlt";
+    public String postEmployeeStickerGenerator(String requestBody) {
+        log.info(String.format("postEmployeeStickerGenerator(%s)", requestBody));
+        final String stickerTempFileName = "employee_sticker.xlt";
         final ObjectMapper mapper = new ObjectMapper();
         try {
-            final NomPartySticker dta = mapper.readValue(requestBody, NomPartySticker.class);
+            final EmployeeSticker stickerData = mapper.readValue(requestBody, EmployeeSticker.class);
             final File stickerTempFile = new File(stickerTempFileName);
-            NomPartyStickerGenerator nomSerStickerGenerator = new NomPartyStickerGenerator(context);
-            nomSerStickerGenerator.generate(stickerTempFile, dta.getCode(), dta.getName(), dta.getParty());
+            EmployeeStickerGenerator employeeStickerGenerator = new EmployeeStickerGenerator(context);
+            employeeStickerGenerator.generate(stickerTempFile, stickerData);
             ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(configLoader.getMfStockConfig().getPrinterName());
-            printConfiguration.setCopies(Integer.parseInt(dta.getCopies()));
+            printConfiguration.setCopies(1);
+            PrintUtils.printFile(stickerTempFile, printConfiguration);
+            //noinspection ResultOfMethodCallIgnored
+            stickerTempFile.delete();
+        } catch (IOException | PrintException | WriterException e) {
+            throw new RuntimeException(e);
+        }
+        return requestBody;
+    }
+
+    @Override
+    public String getNomPartyStickerGenerator() throws IOException {
+        try (InputStream pageEmployeeStickerInputStream = context.getResource(PAGE_PARTY_STICKER_RESOURCE_LOCATION).getInputStream()) {
+            try (BufferedInputStream bufferedPageNomSerStickerInputStream = new BufferedInputStream(pageEmployeeStickerInputStream)) {
+                return new String(bufferedPageNomSerStickerInputStream.readAllBytes());
+            }
+        }
+    }
+
+    @Override
+    public String postNomPartyStickerGenerator(@RequestBody  String requestBody) {
+        log.info(String.format("postNomPartyStickerGenerator(%s)", requestBody));
+        final String stickerTempFileName = "party_sticker.xlt";
+        final ObjectMapper mapper = new ObjectMapper();
+        try {
+            final NomPartySticker stickerData = mapper.readValue(requestBody, NomPartySticker.class);
+            final File stickerTempFile = new File(stickerTempFileName);
+            NomPartyStickerGenerator nomPartyStickerGenerator = new NomPartyStickerGenerator(context);
+            nomPartyStickerGenerator.generate(stickerTempFile, stickerData);
+            ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(configLoader.getMfStockConfig().getPrinterName());
+            printConfiguration.setCopies(Integer.parseInt(stickerData.getCopies()));
             PrintUtils.printFile(stickerTempFile, printConfiguration);
             //noinspection ResultOfMethodCallIgnored
             stickerTempFile.delete();
