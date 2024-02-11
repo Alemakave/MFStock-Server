@@ -44,12 +44,12 @@ public class ReceiveNomenclaturePhotoAction extends TelegramReceivePhotoAction {
     @Override
     public void action(Update update) {
         List<PhotoSize> photoDataList = getPhoto(update);
-        PhotoSize photoData = photoDataList.get(photoDataList.size() - 1);
-        GetFile getFile = new GetFile(photoData.getFileId());
+        PhotoSize photo = photoDataList.get(photoDataList.size() - 1);
+        GetFile getRequestFile = new GetFile(photo.getFileId());
         Long chatId = update.getMessage().getChatId();
         try {
-            org.telegram.telegrambots.meta.api.objects.File file = bot.execute(getFile);
-            File tmpFile = telegramCachePhotoFilesManager.downloadPhotoFile(bot, file);
+            org.telegram.telegrambots.meta.api.objects.File telegramFile = bot.execute(getRequestFile);
+            File tmpFile = telegramCachePhotoFilesManager.downloadPhotoFile(bot, telegramFile);
 
             boolean sendStatusMassage = false;
 

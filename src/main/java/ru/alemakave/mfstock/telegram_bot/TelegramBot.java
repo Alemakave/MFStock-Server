@@ -12,11 +12,17 @@ import ru.alemakave.mfstock.service.DBServiceImpl;
 import ru.alemakave.mfstock.telegram_bot.actions.GetPhotoTelegramAction;
 import ru.alemakave.mfstock.telegram_bot.actions.ReceiveNomenclaturePhotoAction;
 import ru.alemakave.mfstock.telegram_bot.actions.RegistrationMessageAction;
+import ru.alemakave.mfstock.telegram_bot.exception.DownloadFileException;
+import ru.alemakave.slib.file.CachedFile;
 import ru.alemakave.telegram_bot_utils.actions.ITelegramReceiveAction;
 import ru.alemakave.telegram_bot_utils.actions.TelegramReceiveMessageAction;
 import ru.alemakave.telegram_bot_utils.actions.TelegramReceivePhotoAction;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -101,5 +107,28 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     public TelegramCachePhotoFilesManager getPhotoCache() {
         return telegramCachePhotoFilesManager;
+    }
+
+    public CachedFile downloadPhoto(org.telegram.telegrambots.meta.api.objects.File file) throws TelegramApiException, DownloadFileException {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        LocalDateTime now = LocalDateTime.now();
+        int photoNumber = 1;
+        String tempDirPath = System.getenv("TEMP");
+        String photoFileName = String.format("%s_%d_tmp.jpg", dateTimeFormatter.format(now), photoNumber);
+
+        while (Files.exists(Path.of(tempDirPath, photoFileName))) {
+            photoNumber++;
+            photoFileName = String.format("%s_%d_tmp.jpg", dateTimeFormatter.format(now), photoNumber);
+        }
+
+        File tempFile = new File(tempDirPath, photoFileName);
+
+        downloadFile(file, tempFile);
+
+        if (!tempFile.exists()) {
+            throw new DownloadFileException("File not downloaded");
+        }
+
+        return new CachedFile(tempFile);
     }
 }

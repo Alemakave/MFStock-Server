@@ -5,7 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.bots.DefaultAbsSender;
+import ru.alemakave.mfstock.telegram_bot.exception.PhotoAlreadyAdded;
+import ru.alemakave.slib.file.CachedFile;
 import ru.alemakave.slib.utils.FileUtils;
 
 import javax.annotation.PostConstruct;
@@ -13,8 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,23 +25,48 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 @Component
 @Scope(scopeName = SCOPE_SINGLETON)
 public class TelegramCachePhotoFilesManager {
+    @Deprecated
     private final Map<String, File> tempNomPhotoFiles = new TreeMap<>();
+    @Deprecated
     private final Map<String, File> nomPhotoFiles = new TreeMap<>();
+
+    private final Map<String, CachedFile> nomPhotos = new TreeMap<>();
+
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Value("${mfstock.photo.cache.path:.}")
     private String photoCacheDir;
 
+    public void addPhoto(CachedFile file) throws PhotoAlreadyAdded {
+        for (CachedFile cachedFile : nomPhotos.values()) {
+            if (cachedFile.getSha().equals(file.getSha())) {
+                throw new PhotoAlreadyAdded("Photo already added!");
+            }
+        }
+
+        nomPhotos.put(FileUtils.getFileNameWithoutExtention(file.getName()), file);
+    }
+
+    public CachedFile getPhoto(String photoFileName) {
+        return nomPhotos.get(FileUtils.getFileNameWithoutExtention(photoFileName));
+    }
+
+    @Deprecated
     public void addPhotoFile(File file) {
         nomPhotoFiles.put(FileUtils.getFileNameWithoutExtention(file.getName()), file);
     }
 
+    @Deprecated
     public void addTempPhotoFile(File file) {
         tempNomPhotoFiles.put(FileUtils.getFileNameWithoutExtention(file.getName()), file);
     }
 
-    public File downloadPhotoFile(DefaultAbsSender bot, org.telegram.telegrambots.meta.api.objects.File file) throws Exception {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+    /**
+     * @deprecated Moved to telegram bot class
+     */
+    @Deprecated
+    public File downloadPhotoFile(TelegramBot bot, org.telegram.telegrambots.meta.api.objects.File file) throws Exception {
+        /*DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
         LocalDateTime now = LocalDateTime.now();
 
         int photoNumber = 1;
@@ -59,26 +83,34 @@ public class TelegramCachePhotoFilesManager {
         if (tempFile.exists()) {
             addTempPhotoFile(tempFile);
         }
+         */
+        File tempFile = bot.downloadPhoto(file).getFile();
+        addTempPhotoFile(tempFile);
 
         return tempFile;
     }
 
+    @Deprecated
     public File getTempPhotoFile(String date) {
         return tempNomPhotoFiles.get(date);
     }
 
+    @Deprecated
     public File getPhotoFile(String nomCode) {
         return nomPhotoFiles.get(nomCode);
     }
 
+    @Deprecated
     public List<File> getTempNomPhotoFiles() {
         return new ArrayList<>(tempNomPhotoFiles.values());
     }
 
+    @Deprecated
     public List<File> getNomPhotoFiles() {
         return new ArrayList<>(nomPhotoFiles.values());
     }
 
+    //TODO: Переработать
     @PostConstruct
     private void loadFiles() throws IOException {
         Stream<Path> pathStream = Files.list(Path.of(photoCacheDir));

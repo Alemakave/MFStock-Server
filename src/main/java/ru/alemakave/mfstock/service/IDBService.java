@@ -8,5 +8,5 @@ public interface IDBService {
     String closeDB();
     String reloadDB();
     Table getDB();
-    byte[] getPhoto(String nomCode);
+    byte[] getPhoto(String nomCode, int index);
 }

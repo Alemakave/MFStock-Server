@@ -5,6 +5,7 @@ import com.google.common.hash.Hashing;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Objects;
 
 public class CachedFile {
     private final File file;
@@ -52,5 +53,23 @@ public class CachedFile {
                 .hashBytes(fis.readAllBytes())
                 .toString();
         fis.close();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CachedFile)) return false;
+
+        CachedFile that = (CachedFile) o;
+
+        if (!Objects.equals(file, that.file)) return false;
+        return Objects.equals(sha, that.sha);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = file != null ? file.hashCode() : 0;
+        result = 31 * result + (sha != null ? sha.hashCode() : 0);
+        return result;
     }
 }

@@ -102,9 +102,8 @@ public class DBServiceImpl implements IDBService {
     }
 
     @Override
-    public byte[] getPhoto(String nomCode) {
+    public byte[] getPhoto(String nomCode, int index) {
         try {
-            int index = 1;
             File photo = telegramCachePhotoFilesManager.getPhotoFile(nomCode + "_" + index);
             List<byte[]> photosBytes = new ArrayList<>();
             while (photo != null) {
@@ -126,6 +125,7 @@ public class DBServiceImpl implements IDBService {
         }
     }
 
+    @PostConstruct
     private void loadDB() {
         try {
             database = new Table(new File(databaseFilePath));
@@ -171,10 +171,5 @@ public class DBServiceImpl implements IDBService {
                 .filter(tableRow -> tableRow.getCells() != null)
                 .collect(Collectors.toList())
         );
-    }
-
-    @PostConstruct
-    public void init() {
-        loadDB();
     }
 }
