@@ -1,4 +1,4 @@
-package ru.alemakave.mfstock.configs.model;
+package ru.alemakave.mfstock.model.configs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.context.annotation.Scope;

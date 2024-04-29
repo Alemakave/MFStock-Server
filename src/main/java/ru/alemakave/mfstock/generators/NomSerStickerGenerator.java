@@ -1,4 +1,4 @@
-package ru.alemakave.mfstock.model.generators;
+package ru.alemakave.mfstock.generators;
 
 import com.google.zxing.WriterException;
 import org.apache.poi.ss.util.CellAddress;

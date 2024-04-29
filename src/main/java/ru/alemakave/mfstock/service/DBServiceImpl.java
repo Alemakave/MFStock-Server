@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Service;
-import ru.alemakave.mfstock.configs.model.DBConfigsColumns;
-import ru.alemakave.mfstock.configs.service.MFStockConfigLoader;
+import ru.alemakave.mfstock.configs.MFStockConfigLoader;
 import ru.alemakave.mfstock.exceptions.DBException;
+import ru.alemakave.mfstock.model.configs.DBConfigsColumns;
 import ru.alemakave.mfstock.model.table.Table;
 import ru.alemakave.mfstock.model.table.TableCell;
 import ru.alemakave.mfstock.model.table.TableRow;
@@ -97,6 +97,7 @@ public class DBServiceImpl implements IDBService {
         return database;
     }
 
+    @PostConstruct
     private void loadDB() {
         try {
             database = new Table(new File(databaseFilePath));
@@ -142,10 +143,5 @@ public class DBServiceImpl implements IDBService {
                 .filter(tableRow -> tableRow.getCells() != null)
                 .collect(Collectors.toList())
         );
-    }
-
-    @PostConstruct
-    public void init() {
-        loadDB();
     }
 }

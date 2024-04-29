@@ -4,27 +4,19 @@
     <meta charset="UTF-8">
     <title>MFStock home page</title>
     <link rel="stylesheet" href="/get-style?name=HomepageStyle.css">
+    <script type="text/javascript" src="/get-script?name=jquery.js"></script>
+    <script type="text/javascript" src="/get-script?name=db-functions.js"></script>
+    <script>
+    		$(function(){
+      			$("#header").load("/get-html-part?name=header-part.html");
+				injectDatabaseFunctions();
+    		});
+    </script>
   </head>
   <body>
-    <ul>
-      <li>
-        <a href="/mfstock-get-db-date">Get db date</a><br>
-      </li>
-      <li>
-        <a href="/mfstock-close-db">Close db</a><br>
-      </li>
-      <li>
-        <a href="/mfstock-reload-db">Reload db</a><br>
-      </li>
-      <li>
-        <a href="/mfstock-generate-nom-sticker">Nom sticker generator</a><br>
-      </li>
-      <li>
-        <a href="/mfstock-generate-nom-ser-sticker">Nom ser sticker generator</a><br>
-      </li>
-      <li>
-        <a href="/mfstock-generate-cell-sticker">Cell sticker generator</a><br>
-      </li>
-    </ul>
+    <div id="header">
+    </div>
+    <div id="content">
+    </div>
   </body>
 </html>

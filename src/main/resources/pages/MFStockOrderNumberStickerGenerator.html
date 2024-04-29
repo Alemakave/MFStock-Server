@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8">
+		<title>Генератор наклеек с номером заказа</title>
+		<script type="text/javascript" src="/get-script?name=OrderNumberGenerateSender.js"></script>
+		<script type="text/javascript" src="/get-script?name=jquery.js"></script>
+		<script type="text/javascript" src="/get-script?name=db-functions.js"></script>
+		<script>
+    		$(function(){
+      			$("#header").load("/get-html-part?name=header-part.html", function() {
+      				let headerElement = $(".header-element.order-number").get(0);
+      				headerElement.classList.add("selected");
+      				headerElement.attributes.removeNamedItem("href");
+					injectDatabaseFunctions();
+      			});
+    		});
+    	</script>
+		<link rel="stylesheet" href="/get-style?name=generator.css">
+	</head>
+	<body>
+		<div id="header">
+		</div>
+		<div id="content">
+			<div id="sticker">
+				<div id="sticker-block">
+				<div id="sticker-label-block">
+					<div class="label" name="order-number">Номер заказа:</div>
+					<div class="label" name="order-count-cargo-spaces">Кол-во грузомест:</div>
+				</div>
+				<div id="sticker-input-block">
+					<input class="input" id="input-order-number" placeholder="Номер заказа">
+					<input class="input" id="input-order-count-cargo-spaces" placeholder="Кол-во грузомест" type="number" min="0" value="0">
+				</div>
+			</div>
+				<div id="sticker-buttons-block">
+					<div style="width: 100%;"></div>
+					<button id="print-button" onclick="mfstockGenerateEmployeeSticker();">Печать</button>
+				</div>
+			</div>
+			<script type="text/javascript">
+				const inputs = document.getElementsByClassName("input");
+				for (let i = 0; i < inputs.length; i++) {
+					inputs[i].onclick = null;
+					inputs[i].onfocus = inputs[i].select;
+				}
+			</script>
+		</div>
+	</body>
+</html>

@@ -1,8 +1,11 @@
 package ru.alemakave.mfstock.model.table;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
@@ -10,6 +13,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
+import static org.apache.poi.ss.usermodel.CellType.NUMERIC;
+
+@Slf4j
 public class RowCollector<T, A, R> implements Collector<T, A, R> {
     private static final Set<Collector.Characteristics> CH_ID
             = Collections.unmodifiableSet(EnumSet.of(Collector.Characteristics.IDENTITY_FINISH));
@@ -66,7 +72,13 @@ public class RowCollector<T, A, R> implements Collector<T, A, R> {
         return new RowCollector<>((Supplier<List<TableRow>>) ArrayList::new, (tableRows, t) -> {
             TableRow row = new TableRow();
             for (Cell cell : t) {
-                row.addCell(cell.getStringCellValue());
+                if (cell.getCellType() == NUMERIC
+                        && !DateUtil.isCellDateFormatted(cell)) {
+                    DecimalFormat df = new DecimalFormat("#.##");
+                    row.addCell(new TableCell(df.format(cell.getNumericCellValue()), NUMERIC));
+                } else {
+                    row.addCell(new TableCell(cell.toString(), cell.getCellType()));
+                }
             }
             tableRows.add(row);
         },

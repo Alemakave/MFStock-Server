@@ -1,2 +1,33 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css");
+@import url("/get-style?name=generator.css");
+
 a {
+}
+
+#header {
+    height: 50px;
+    background: rgb(112, 112, 112);
+    margin: 0;
+    color: white;
+    display: flex;
+    flex-direction: row;
+}
+
+.header-element {
+    display: inline;
+    line-height: 50px;
+    background: rgb(112, 112, 112);
+    flex: 1;
+    text-decoration: none;
+    color: white;
+    text-align: center;
+}
+
+.header-element:hover:not([class*=selected]):not([class*=empty]) {
+    background: rgb(144, 144, 144);
+}
+
+#available-pages-list {
+    display: flex;
+    flex-direction: column;
 }

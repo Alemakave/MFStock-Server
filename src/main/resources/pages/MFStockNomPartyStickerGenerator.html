@@ -2,25 +2,22 @@
 <html lang="ru">
 	<head>
 		<meta charset="UTF-8">
-		<title>NomGenerator</title>
-		<script type="text/javascript" src="/get-script?name=CellGenerateSender.js"></script>
+		<title>Nom Party Sticker Generator</title>
+		<script type="text/javascript" src="/get-script?name=NomPartyGenerateSender.js"></script>
+		<script type="text/javascript" src="/get-script?name=ChangeInputButton.js"></script>
 		<script type="text/javascript" src="/get-script?name=jquery.js"></script>
 		<script type="text/javascript" src="/get-script?name=db-functions.js"></script>
 		<script>
     		$(function(){
       			$("#header").load("/get-html-part?name=header-part.html", function() {
-      				let headerElement = $(".header-element.cell").get(0);
+      				let headerElement = $(".header-element.nom-party").get(0);
       				headerElement.classList.add("selected");
       				headerElement.attributes.removeNamedItem("href");
 					injectDatabaseFunctions();
       			});
     		});
-      		$("#upload-form").submit(function () {
-				return false;
-			});
     	</script>
 		<link rel="stylesheet" href="/get-style?name=generator.css">
-		<link rel="stylesheet" href="/get-style?name=table.css">
 	</head>
 	<body>
 		<div id="header">
@@ -29,39 +26,36 @@
 			<div id="sticker">
 				<div id="sticker-block">
 					<div id="sticker-label-block">
-						<div class="label" name="cell-address">Адрес ячейки:</div>
-						<div class="label" name="cell-code">Код ячейки:</div>
+						<div class="label" name="nom-name">Наименование:</div>
+						<div class="label" name="nom-code">Код товара:</div>
+						<div class="label" name="nom-party-num">Партия:</div>
+						<div class="label" name="sticker-copies">Напечатать количество:</div>
 					</div>
 					<div id="sticker-input-block">
-						<input class="input" id="input-cell-address" placeholder="Адрес ячейки">
-						<input class="input" id="input-cell-code" placeholder="N">
+						<input class="input" id="input-nom-name" placeholder="Наименование">
+						<input class="input" id="input-nom-code" placeholder="Код">
+						<input class="input" id="input-nom-party" placeholder="Партия">
+						<input class="input" id="input-sticker-copies" name="input-sticker-copies" type="number" min="1" value="1">
 					</div>
 				</div>
 				<div id="upload-block" style="display: none;">
-					<form method="POST" enctype="multipart/form-data" action="/mfstock-generate-cell-sticker">
+					<form method="POST" enctype="multipart/form-data" action="/mfstock-generate-nom-party-sticker">
 						<input type="file" name="data-file" id="data-file" accept="application/vnd.ms-excel, .xlsx">
-						<input class="submit" type="submit" value="Send" />
+						<button>Submit</button>
 					</form>
 				</div>
 				<div id="sticker-buttons-block">
 					<div style="width: 100%;"></div>
-					<div id="change-input-button" onclick="changeInputType()">
-						<img id="upload-image" src="/get-image?name=upload-file.svg" style="display: none;">
-						<img id="input-image" src="/get-image?name=input-field.svg" style="">
-					</div>
-					<button id="print-button" onclick="print();">Печать</button>
+					<button id="print-button" onclick="mfstockGenerateNomSerSticker();">Печать</button>
 				</div>
 			</div>
-			<div id="upload">
-			</div>
-		</div>
-		<script type="text/javascript" src="/get-script?name=ChangeInputButton.js"></script>
-		<script type="text/javascript">
+			<script type="text/javascript">
 				const inputs = document.getElementsByClassName("input");
 				for (let i = 0; i < inputs.length; i++) {
 					inputs[i].onclick = null;
 					inputs[i].onfocus = inputs[i].select;
 				}
-		</script>
+			</script>
+		</div>
 	</body>
 </html>
