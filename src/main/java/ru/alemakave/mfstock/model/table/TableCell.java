@@ -1,13 +1,24 @@
 package ru.alemakave.mfstock.model.table;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.poi.ss.usermodel.CellType;
+import ru.alemakave.mfstock.utils.function.ToHtmlFunction;
 
 import java.util.Objects;
 
-public class TableCell {
+public class TableCell implements ToHtmlFunction {
     private String value;
+    @JsonIgnore
+    private CellType cellType;
 
+    public TableCell(@JsonProperty("value") String value, CellType cellType) {
+        this.value = value;
+        this.cellType = cellType;
+    }
+
+    @Deprecated
     @JsonCreator
     public TableCell(@JsonProperty("value") String value) {
         this.value = value;
@@ -19,6 +30,19 @@ public class TableCell {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public CellType getCellType() {
+        return cellType;
+    }
+
+    public void setCellType(CellType cellType) {
+        this.cellType = cellType;
+    }
+
+    @Override
+    public String applyAsHtml() {
+        return String.format("<div class=\"table-cell\">%s</div>", value);
     }
 
     @Override

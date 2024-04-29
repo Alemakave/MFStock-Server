@@ -2,15 +2,21 @@ package ru.alemakave.mfstock.model.table;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
 import ru.alemakave.mfstock.model.configs.DBConfigsColumns;
 import ru.alemakave.mfstock.model.json.DateTimeJson;
+import ru.alemakave.mfstock.utils.function.ToHtmlFunction;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +25,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-public class Table {
+import static ru.alemakave.slib.utils.ResourceLoader.getLocalFileInputStream;
+
+public class Table implements ToHtmlFunction {
     private DateTimeJson databaseDate = null;
     private List<TableRow> rows;
 
@@ -29,11 +37,14 @@ public class Table {
     }
 
     public Table(File file) throws IOException {
-        init(file);
+        init(WorkbookFactory.create(file));
     }
 
-    private void init(File file) throws IOException {
-        Workbook workbook = WorkbookFactory.create(file);
+    public Table(InputStream inputStream) throws IOException {
+        init(WorkbookFactory.create(inputStream));
+    }
+
+    private void init(Workbook workbook) throws IOException {
         databaseDate = new DateTimeJson(((XSSFWorkbook)workbook).getProperties().getCoreProperties().getModified(), new SimpleDateFormat("dd.MM.yyyy HH:mm"));
         Sheet sheet = workbook.getSheetAt(0);
         rows = StreamSupport.stream(sheet.spliterator(), false)
@@ -51,7 +62,25 @@ public class Table {
     public void saveColumnsAccordingHeaders(DBConfigsColumns... columnsConfig) {
         int[] headersIndex = new int[columnsConfig.length];
         for (int i = 0; i < columnsConfig.length; i++) {
-            headersIndex[i] = rows.get(0).getCells().indexOf(new TableCell(columnsConfig[i].getHeaderText()));
+//            headersIndex[i] = rows.get(0).getCells().indexOf(new TableCell(columnsConfig[i].getHeaderText()));
+            final TableCell exceptedTableCell = new TableCell(columnsConfig[i].getHeaderText());
+            headersIndex[i] = ListUtils.indexOf(rows.get(0).getCells(), object ->
+                    object.toString().equalsIgnoreCase(exceptedTableCell.toString())
+            );
+        }
+
+        saveRowByIndexes(headersIndex);
+        System.gc();
+    }
+
+    public void saveColumnsAccordingHeaders(List<DBConfigsColumns> columnsConfig) {
+        int[] headersIndex = new int[columnsConfig.size()];
+        for (int i = 0; i < columnsConfig.size(); i++) {
+//            headersIndex[i] = rows.get(0).getCells().indexOf(new TableCell(columnsConfig.get(i).getHeaderText()));
+            final TableCell exceptedTableCell = new TableCell(columnsConfig.get(i).getHeaderText());
+            headersIndex[i] = ListUtils.indexOf(rows.get(0).getCells(), object ->
+                    object.toString().equalsIgnoreCase(exceptedTableCell.toString())
+            );
         }
 
         saveRowByIndexes(headersIndex);
@@ -96,6 +125,50 @@ public class Table {
 
     public DateTimeJson getDatabaseDate() {
         return databaseDate;
+    }
+
+    @Override
+    public String applyAsHtml() {
+        try {
+            InputStream is = getLocalFileInputStream("/pages/html-parts/upload-table-part.html");
+            BufferedInputStream bis = new BufferedInputStream(is);
+            Element htmlDocument = Jsoup.parse(
+                    new String(
+                            bis
+                                    .readAllBytes()
+                    )
+            ).body().child(0);
+            bis.close();
+            is.close();
+
+            htmlDocument.getElementsByClass("table-header").get(0).children().clear();
+            htmlDocument.getElementsByClass("table-content").get(0).children().clear();
+
+            for (int i = 0; i < this.getRowsCount(); i++) {
+                if (i == 0) {
+                    htmlDocument.getElementsByClass("table-header").get(0).after(rows.get(i).applyAsHtml());
+
+                    htmlDocument.getElementsByClass("table-row").get(0).addClass("table-header");
+                    htmlDocument.getElementsByClass("table-row").get(0).removeClass("table-row");
+
+                    htmlDocument.getElementsByClass("table-header").get(0).remove();
+                    for (Element child : htmlDocument.getElementsByClass("table-header").get(0).children()) {
+                        child.removeClass(child.className());
+                        child.addClass("table-header-cell");
+                    }
+                } else {
+                    htmlDocument.getElementsByClass("table-content").get(0).append(rows.get(i).applyAsHtml());
+                }
+            }
+
+            return htmlDocument.toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public int getRowsCount() {
+        return rows.size();
     }
 
     @Override

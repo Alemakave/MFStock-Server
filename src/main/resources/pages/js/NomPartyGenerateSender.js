@@ -1,4 +1,4 @@
-async function mfstockGenerateNomSerSticker() {
+async function print() {
     let nomName = document.getElementById("input-nom-name").value;
     let nomCode = document.getElementById("input-nom-code").value;
     let nomParty = document.getElementById("input-nom-party").value;
@@ -15,4 +15,8 @@ async function mfstockGenerateNomSerSticker() {
             'Content-Type': 'application/json'
         }
     });
+}
+
+async function mfstockGenerateNomSerSticker() {
+    await print();
 }

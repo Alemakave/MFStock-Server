@@ -13,13 +13,11 @@ import ru.alemakave.mfstock.model.configs.DBConfigsColumns;
 import ru.alemakave.mfstock.model.table.Table;
 import ru.alemakave.mfstock.model.table.TableCell;
 import ru.alemakave.mfstock.model.table.TableRow;
-import ru.alemakave.mfstock.telegram_bot.TelegramCachePhotoFilesManager;
 import ru.alemakave.mfstock.utils.PageUtils;
 import ru.alemakave.mfstock.utils.TableUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,15 +36,13 @@ public class DBServiceImpl implements IDBService {
     private Table database = null;
     private final MFStockConfigLoader configLoader;
     private final ConfigurableApplicationContext configurableApplicationContext;
-    private final TelegramCachePhotoFilesManager telegramCachePhotoFilesManager;
 
-    public DBServiceImpl(MFStockConfigLoader configLoader, ConfigurableApplicationContext configurableApplicationContext, TelegramCachePhotoFilesManager telegramCachePhotoFilesManager) {
+    public DBServiceImpl(MFStockConfigLoader configLoader, ConfigurableApplicationContext configurableApplicationContext) {
         this.configLoader = configLoader;
         this.configurableApplicationContext = configurableApplicationContext;
         if (databaseFilePath == null) {
             databaseFilePath = ".\\Cache\\DB.xlsx";
         }
-        this.telegramCachePhotoFilesManager = telegramCachePhotoFilesManager;
     }
 
     @Override
@@ -99,30 +95,6 @@ public class DBServiceImpl implements IDBService {
         }
 
         return database;
-    }
-
-    @Override
-    public byte[] getPhoto(String nomCode, int index) {
-        try {
-            File photo = telegramCachePhotoFilesManager.getPhotoFile(nomCode + "_" + index);
-            List<byte[]> photosBytes = new ArrayList<>();
-            while (photo != null) {
-                FileInputStream fis = new FileInputStream(photo);
-                byte[] photoBytes = fis.readAllBytes();
-                fis.close();
-                photosBytes.add(photoBytes);
-                index++;
-                photo = telegramCachePhotoFilesManager.getPhotoFile(nomCode + "_" + index);
-            }
-
-            if (photosBytes.isEmpty()) {
-                return null;
-            }
-
-            return photosBytes.get(0);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @PostConstruct

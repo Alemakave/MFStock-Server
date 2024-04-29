@@ -2,40 +2,52 @@
 <html lang="ru">
 	<head>
 		<meta charset="UTF-8">
-		<title>NomPartyGenerator</title>
+		<title>Nom Party Sticker Generator</title>
 		<script type="text/javascript" src="/get-script?name=NomPartyGenerateSender.js"></script>
+		<script type="text/javascript" src="/get-script?name=ChangeInputButton.js"></script>
+		<script type="text/javascript" src="/get-script?name=jquery.js"></script>
+		<script type="text/javascript" src="/get-script?name=db-functions.js"></script>
+		<script>
+    		$(function(){
+      			$("#header").load("/get-html-part?name=header-part.html", function() {
+      				let headerElement = $(".header-element.nom-party").get(0);
+      				headerElement.classList.add("selected");
+      				headerElement.attributes.removeNamedItem("href");
+					injectDatabaseFunctions();
+      			});
+    		});
+    	</script>
 		<link rel="stylesheet" href="/get-style?name=generator.css">
 	</head>
 	<body>
 		<div id="header">
-			<a class="header-element" href="/mfstock-generate-nom-sticker">Генератор наклеек на продукцию</a>
-			<a class="header-element" href="/mfstock-generate-nom-ser-sticker">Генератор наклеек с СНИ на продукцию</a>
-			<a class="header-element selected">Генератор наклеек с партией</a>
-			<a class="header-element" href="/mfstock-generate-cell-sticker">Генератор наклеек ячеек</a>
-			<a class="header-element" href="/mfstock-generate-employee-sticker">Генератор наклеек сотрудников</a>
-			<a class="header-element empty"></a>
-			<div class="header-element profile">
-				<div class="profile-icon"></div>
-			</div>
 		</div>
-		<div id="base-block">
-			<div id="sticker-block">
-				<div id="sticker-label-block">
-					<div class="label" name="nom-name">Наименование:</div>
-					<div class="label" name="nom-code">Код товара:</div>
-					<div class="label" name="nom-party-num">Партия:</div>
-					<div class="label" name="sticker-copies">Напечатать количество:</div>
+		<div id="content">
+			<div id="sticker">
+				<div id="sticker-block">
+					<div id="sticker-label-block">
+						<div class="label" name="nom-name">Наименование:</div>
+						<div class="label" name="nom-code">Код товара:</div>
+						<div class="label" name="nom-party-num">Партия:</div>
+						<div class="label" name="sticker-copies">Напечатать количество:</div>
+					</div>
+					<div id="sticker-input-block">
+						<input class="input" id="input-nom-name" placeholder="Наименование">
+						<input class="input" id="input-nom-code" placeholder="Код">
+						<input class="input" id="input-nom-party" placeholder="Партия">
+						<input class="input" id="input-sticker-copies" name="input-sticker-copies" type="number" min="1" value="1">
+					</div>
 				</div>
-				<div id="sticker-input-block">
-					<input class="input" id="input-nom-name">
-					<input class="input" id="input-nom-code">
-					<input class="input" id="input-nom-party">
-					<input class="input" id="input-sticker-copies" name="input-sticker-copies" type="number" min="1" value="1">
+				<div id="upload-block" style="display: none;">
+					<form method="POST" enctype="multipart/form-data" action="/mfstock-generate-nom-party-sticker">
+						<input type="file" name="data-file" id="data-file" accept="application/vnd.ms-excel, .xlsx">
+						<button>Submit</button>
+					</form>
 				</div>
-			</div>
-			<div id="sticker-buttons-block">
-				<div style="width: 100%;"></div>
-				<button id="print-button" onclick="mfstockGenerateNomSerSticker();">Печать</button>
+				<div id="sticker-buttons-block">
+					<div style="width: 100%;"></div>
+					<button id="print-button" onclick="mfstockGenerateNomSerSticker();">Печать</button>
+				</div>
 			</div>
 			<script type="text/javascript">
 				const inputs = document.getElementsByClassName("input");

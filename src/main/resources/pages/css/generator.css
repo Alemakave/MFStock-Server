@@ -1,3 +1,5 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css");
+
 .header-element {
     display: inline;
     line-height: 50px;
@@ -32,7 +34,7 @@
 
 #header {
     height: 50px;
-    background-color: black;
+    background: rgb(112, 112, 112);
     margin: 0;
     color: white;
     display: flex;
@@ -44,9 +46,32 @@
 }
 
 #print-button {
-    height: 30px;
-    width: 70px;
+    min-width: 70px;
+    height: 40px;
     text-align: center;
+}
+
+#change-input-button {
+    min-width: 40px;
+    min-height: 40px;
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 3px;
+    margin: 0 3px;
+    cursor: pointer;
+}
+
+#upload-image, #input-image {
+    min-width: 28px;
+    min-height: 28px;
+    height: 28px;
+    width: 28px;
+    padding: 6px;
+}
+
+#upload-form {
+    padding: 7px 7px;
 }
 
 #sticker-label-block {
@@ -66,12 +91,17 @@
     display: flex;
 }
 
-#base-block {
+#base-block, #content {
+    display: flex;
+}
+
+#sticker {
     background: rgba(0, 0, 0, 30%);
     padding: 10px;
     border-radius: 10px;
     margin: 5px 0;
     width: 350px;
+    height: 100%;
 }
 
 body {
@@ -79,16 +109,77 @@ body {
     margin: 0 5px;
 }
 
-.profile {
+.header-element.profile {
     width: 50px;
     background: black;
     max-width: 50px;
     display: none;
 }
+
 .profile-icon {
     background: white;
     width: 42px;
     height: 42px;
     margin: 4px;
     border-radius: 50%;
+}
+
+#table-close-button {
+    background: #777;
+    width: 20px;
+    height: 20px;
+    position: relative;
+    right: 25px;
+    top: 5px;
+    color: white;
+    text-align: center;
+    text-anchor: middle;
+    cursor: pointer;
+}
+
+.header-element.db-functions {
+    min-width: 250px;
+    max-width: 250px;
+}
+
+.dropdown {
+    cursor: default;
+}
+
+.dropdown:hover .dropdown-content-db-functions {
+    display: block;
+}
+
+.dropdown-content-db-functions {
+    min-width: 250px;
+    max-width: 250px;
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown-content-db-functions a {
+    float: none;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+    line-height: 30px;
+    background: white;
+    color: black;
+}
+
+.dropdown-content-db-functions a:hover {
+    color: white;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }

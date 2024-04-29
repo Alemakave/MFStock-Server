@@ -2,14 +2,14 @@
 <html lang="ru">
 	<head>
 		<meta charset="UTF-8">
-		<title>NomGenerator</title>
-		<script type="text/javascript" src="/get-script?name=EmployeeGenerateSender.js"></script>
+		<title>Генератор наклеек с номером заказа</title>
+		<script type="text/javascript" src="/get-script?name=OrderNumberGenerateSender.js"></script>
 		<script type="text/javascript" src="/get-script?name=jquery.js"></script>
 		<script type="text/javascript" src="/get-script?name=db-functions.js"></script>
 		<script>
     		$(function(){
       			$("#header").load("/get-html-part?name=header-part.html", function() {
-      				let headerElement = $(".header-element.employee").get(0);
+      				let headerElement = $(".header-element.order-number").get(0);
       				headerElement.classList.add("selected");
       				headerElement.attributes.removeNamedItem("href");
 					injectDatabaseFunctions();
@@ -25,14 +25,12 @@
 			<div id="sticker">
 				<div id="sticker-block">
 				<div id="sticker-label-block">
-					<div class="label" name="employee-name">ФИО:</div>
-					<div class="label" name="employee-code">Код сотрудника:</div>
-					<div class="label" name="employee-pass">Пароль:</div>
+					<div class="label" name="order-number">Номер заказа:</div>
+					<div class="label" name="order-count-cargo-spaces">Кол-во грузомест:</div>
 				</div>
 				<div id="sticker-input-block">
-					<input class="input" id="input-employee-name" placeholder="ФИО">
-					<input class="input" id="input-employee-code" placeholder="Код пользователя">
-					<input class="input" id="input-employee-pass" placeholder="Пароль">
+					<input class="input" id="input-order-number" placeholder="Номер заказа">
+					<input class="input" id="input-order-count-cargo-spaces" placeholder="Кол-во грузомест" type="number" min="0" value="0">
 				</div>
 			</div>
 				<div id="sticker-buttons-block">

@@ -1,4 +1,4 @@
-async function mfstockGenerateCellSticker() {
+async function print() {
     let cellAddress = document.getElementById("input-cell-address").value;
     let cellCode = document.getElementById("input-cell-code").value;
     fetch(document.URL, {
@@ -11,4 +11,8 @@ async function mfstockGenerateCellSticker() {
             'Content-Type': 'application/json'
         }
     });
+}
+
+async function mfstockGenerateCellSticker() {
+    await print();
 }

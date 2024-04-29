@@ -4,42 +4,64 @@
 		<meta charset="UTF-8">
 		<title>NomGenerator</title>
 		<script type="text/javascript" src="/get-script?name=CellGenerateSender.js"></script>
+		<script type="text/javascript" src="/get-script?name=jquery.js"></script>
+		<script type="text/javascript" src="/get-script?name=db-functions.js"></script>
+		<script>
+    		$(function(){
+      			$("#header").load("/get-html-part?name=header-part.html", function() {
+      				let headerElement = $(".header-element.cell").get(0);
+      				headerElement.classList.add("selected");
+      				headerElement.attributes.removeNamedItem("href");
+					injectDatabaseFunctions();
+      			});
+    		});
+      		$("#upload-form").submit(function () {
+				return false;
+			});
+    	</script>
 		<link rel="stylesheet" href="/get-style?name=generator.css">
+		<link rel="stylesheet" href="/get-style?name=table.css">
 	</head>
 	<body>
 		<div id="header">
-			<a class="header-element" href="/mfstock-generate-nom-sticker">Генератор наклеек на продукцию</a>
-			<a class="header-element" href="/mfstock-generate-nom-ser-sticker">Генератор наклеек с СНИ на продукцию</a>
-			<a class="header-element" href="/mfstock-generate-nom-party-sticker">Генератор наклеек с партией</a>
-			<a class="header-element selected">Генератор наклеек ячеек</a>
-			<a class="header-element" href="/mfstock-generate-employee-sticker">Генератор наклеек сотрудников</a>
-			<a class="header-element empty"></a>
-			<div class="header-element profile">
-				<div class="profile-icon"></div>
+		</div>
+		<div id="content">
+			<div id="sticker">
+				<div id="sticker-block">
+					<div id="sticker-label-block">
+						<div class="label" name="cell-address">Адрес ячейки:</div>
+						<div class="label" name="cell-code">Код ячейки:</div>
+					</div>
+					<div id="sticker-input-block">
+						<input class="input" id="input-cell-address" placeholder="Адрес ячейки">
+						<input class="input" id="input-cell-code" placeholder="N">
+					</div>
+				</div>
+				<div id="upload-block" style="display: none;">
+					<form method="POST" enctype="multipart/form-data" action="/mfstock-generate-cell-sticker">
+						<input type="file" name="data-file" id="data-file" accept="application/vnd.ms-excel, .xlsx">
+						<input class="submit" type="submit" value="Send" />
+					</form>
+				</div>
+				<div id="sticker-buttons-block">
+					<div style="width: 100%;"></div>
+					<div id="change-input-button" onclick="changeInputType()">
+						<img id="upload-image" src="/get-image?name=upload-file.svg" style="display: none;">
+						<img id="input-image" src="/get-image?name=input-field.svg" style="">
+					</div>
+					<button id="print-button" onclick="print();">Печать</button>
+				</div>
+			</div>
+			<div id="upload">
 			</div>
 		</div>
-		<div id="base-block">
-			<div id="sticker-block">
-				<div id="sticker-label-block">
-					<div class="label" name="cell-address">Адрес ячейки:</div>
-					<div class="label" name="cell-code">Код ячейки:</div>
-				</div>
-				<div id="sticker-input-block">
-					<input class="input" id="input-cell-address">
-					<input class="input" id="input-cell-code">
-				</div>
-			</div>
-			<div id="sticker-buttons-block">
-				<div style="width: 100%;"></div>
-				<button id="print-button" onclick="mfstockGenerateCellSticker();">Печать</button>
-			</div>
-			<script type="text/javascript">
+		<script type="text/javascript" src="/get-script?name=ChangeInputButton.js"></script>
+		<script type="text/javascript">
 				const inputs = document.getElementsByClassName("input");
 				for (let i = 0; i < inputs.length; i++) {
 					inputs[i].onclick = null;
 					inputs[i].onfocus = inputs[i].select;
 				}
-			</script>
-		</div>
+		</script>
 	</body>
 </html>

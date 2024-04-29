@@ -1,4 +1,4 @@
-async function mfstockGenerateEmployeeSticker() {
+async function print() {
     let employeeName = document.getElementById("input-employee-name").value;
     let employeeCode = document.getElementById("input-employee-code").value;
     let employeePass = document.getElementById("input-employee-pass").value;
@@ -13,4 +13,8 @@ async function mfstockGenerateEmployeeSticker() {
             'Content-Type': 'application/json'
         }
     });
+}
+
+async function mfstockGenerateEmployeeSticker() {
+    await print();
 }

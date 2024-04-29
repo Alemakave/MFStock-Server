@@ -3,12 +3,14 @@ package ru.alemakave.mfstock.model.table;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.poi.ss.usermodel.CellType;
+import ru.alemakave.mfstock.utils.function.ToHtmlFunction;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class TableRow {
+public class TableRow implements ToHtmlFunction {
     private List<TableCell> cells;
 
     public TableRow() {
@@ -28,13 +30,33 @@ public class TableRow {
         this.cells = cells;
     }
 
+    public void addCell(TableCell cell) {
+        cells.add(cell);
+    }
+
+    @Deprecated
     protected void addCell(String cellValue) {
-        cells.add(new TableCell(cellValue));
+        cells.add(new TableCell(cellValue, CellType.STRING));
     }
 
     @JsonIgnore
     public boolean isEmpty() {
         return toString().equals("|".repeat(cells.size()-1));
+    }
+
+    @Override
+    public String applyAsHtml() {
+        String result = "<div class=\"table-row\">\n";
+
+        for (TableCell cell : cells) {
+            result += "\t";
+            result += cell.applyAsHtml();
+            result += "\n";
+        }
+
+        result += "</div>";
+
+        return result;
     }
 
     @Override
