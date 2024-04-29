@@ -11,7 +11,7 @@ targetCompatibility = 11
 compileJava.options.encoding = 'UTF-8'
 
 group 'ru.alemakave.mfstock.server'
-version '0.0.5-ALPHA'
+version '0.0.6-ALPHA'
 
 repositories {
     mavenCentral()
