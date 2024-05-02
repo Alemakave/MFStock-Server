@@ -3,6 +3,7 @@ package ru.alemakave.mfstock.configs;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.Resource;
@@ -20,6 +21,7 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 @Component
 @Scope(scopeName = SCOPE_SINGLETON)
 public class MFStockConfigLoader {
+    @Value("${mfstock.config.path:./MFStockServer.json}")
     public static final String PROPERTIES_FILE_PATH = "./MFStockServer.json";
     private final Map<String, Object> configs = new HashMap<>();
     private final MFStockConfig mfStockConfig;
