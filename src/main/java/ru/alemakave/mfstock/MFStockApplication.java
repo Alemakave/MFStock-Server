@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import ru.alemakave.mfstock.configs.MFStockConfigLoader;
+import ru.alemakave.slib.vc.utils.UpdateUtils;
 
 import javax.annotation.PostConstruct;
 
@@ -18,8 +19,11 @@ public class MFStockApplication {
     }
 
     public static void main(String[] args) {
-        new SpringApplicationBuilder(MFStockApplication.class)
-                .run(args);
+        new SpringApplicationBuilder(MFStockApplication.class).run(args);
+
+        UpdateUtils.checkUpdateFromGradle(BuildInfo.BUILD_VERSION,
+                "https://raw.githubusercontent.com/Alemakave/MFStock-Server/master/build.gradle",
+                "Update available via link: https://github.com/Alemakave/MFStock-Server/releases");
     }
 
     @PostConstruct
