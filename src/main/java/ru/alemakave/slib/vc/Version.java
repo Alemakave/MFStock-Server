@@ -4,11 +4,14 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
+import ru.alemakave.slib.vc.exception.InvalidVersionFormatException;
 import ru.alemakave.slib.vc.exception.VersionParseException;
 
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static ru.alemakave.slib.vc.utils.VersionUtils.isValidVersion;
 
 @Getter
 @EqualsAndHashCode
@@ -64,6 +67,10 @@ public class Version implements Comparable<Version> {
      * @return   Version object
      */
     public static Version parse(String version) {
+        if (!isValidVersion(version)) {
+            throw new InvalidVersionFormatException(version);
+        }
+
         final String regex = "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$";
         final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
         final Matcher matcher = pattern.matcher(version);
