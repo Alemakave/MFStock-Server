@@ -51,3 +51,16 @@ tasks.register('buildSnapshot') {
     version = version.toString().split("-")[0] + "-snapshot" + format.format(new Date())
     dependsOn("build")
 }
+
+tasks.register('generateBuildInfoClass') {
+    var outputDir = file("$buildDir/generated/sources/src/main/java/ru/alemakave/mfstock")
+    outputs.dir outputDir
+    doLast {
+        outputDir.exists() || outputDir.mkdirs()
+
+        new File(outputDir, "BuildInfo.java").write("package ru.alemakave.mfstock;\n\npublic class BuildInfo {\n" + "    public static final String BUILD_VERSION = \"" + version + "\";\n}")
+    }
+}
+
+sourceSets.main.java.srcDir "$buildDir/generated/sources/src/main/java"
+compileJava.dependsOn generateBuildInfoClass

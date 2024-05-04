@@ -1,4 +1,4 @@
-package ru.alemakave.slib.utils.version.exception;
+package ru.alemakave.slib.vc.exception;
 
 public class VersionParseException extends RuntimeException {
     public VersionParseException(String version) {

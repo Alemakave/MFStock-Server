@@ -1,4 +1,4 @@
-package ru.alemakave.slib.utils.version;
+package ru.alemakave.slib.vc.utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
