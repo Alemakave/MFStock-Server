@@ -300,7 +300,7 @@ public class StickerServiceImpl implements IStickerService {
 
             for (Element tableRow : jsoupDocument.getElementsByClass("table-header")) {
                 tableRow.child(0).before("<div class=\"table-header-cell\"><input type=\"checkbox\" class=\"selectAllInColumn\"/></div>");
-                tableRow.child(tableRow.childrenSize() - 1).after("<div id=\"table-close-button\" onclick=\"closeTable()\">X</div>");
+                tableRow.child(tableRow.childrenSize() - 1).after("<div id=\"table-close-button\" onclick=\"closeTable()\"><img src=\"/get-image?name=close.svg\" id=\"close-image\"\"></div>");
             }
 
             for (Element tableRow : jsoupDocument.getElementsByClass("table-row")) {
