@@ -175,6 +175,11 @@ body {
     color: white;
 }
 
+#close-image {
+    width: 100%;
+    filter: invert(1);
+}
+
 @keyframes rotate {
     from {
         transform: rotate(0deg);
