@@ -17,9 +17,8 @@ public interface IStickerService {
     String postCellStickerGenerator(@RequestBody String requestBody);
     String getEmployeeStickerGenerator() throws IOException;
     String postEmployeeStickerGenerator(@RequestBody String requestBody);
-    String getNomPartyStickerGenerator() throws IOException;
-    String postNomPartyStickerGenerator(@RequestBody String requestBody);
     ResponseEntity<String> uploadStickersDataTable(@RequestParam("data-file") MultipartFile file, String currentHtmlCode);
     String getOrderNumberStickerGenerator() throws IOException;
     String postOrderNumberStickerGenerator(@RequestBody String requestBody);
+    ResponseEntity<String> getAvailablePrinters() throws Exception;
 }

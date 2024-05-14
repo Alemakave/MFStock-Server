@@ -22,11 +22,6 @@ public class DBController {
         return dbService.findFromScan(searchString);
     }
 
-    @GetMapping(path = {"/mfstock-close-db"})
-    public String closeDB() {
-        return dbService.closeDB();
-    }
-
     @GetMapping(path = "/mfstock-reload-db")
     public String reloadDB() {
         return dbService.reloadDB();

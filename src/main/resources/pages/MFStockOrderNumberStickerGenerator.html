@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>Генератор наклеек с номером заказа</title>
-		<script type="text/javascript" src="/get-script?name=OrderNumberGenerateSender.js"></script>
+		<script type="text/javascript" src="/get-script?name=GenerateSender.js"></script>
 		<script type="text/javascript" src="/get-script?name=jquery.js"></script>
 		<script type="text/javascript" src="/get-script?name=db-functions.js"></script>
 		<script>
@@ -14,6 +14,15 @@
       				headerElement.attributes.removeNamedItem("href");
 					injectDatabaseFunctions();
       			});
+    		});
+    		$(document).ready(async function() {
+        		let availablePrintersResponse = await $.getJSON("/mfstock-get-available-printers");
+        		let availablePrinters = availablePrintersResponse.printers;
+				for (var i = 0; i < availablePrinters.length; i++) {
+					var printerSelectOption = document.createElement("option");
+					printerSelectOption.textContent = availablePrinters[i];
+					document.getElementById("input-select-printer").appendChild(printerSelectOption);
+				}
     		});
     	</script>
 		<link rel="stylesheet" href="/get-style?name=generator.css">
@@ -27,15 +36,19 @@
 				<div id="sticker-label-block">
 					<div class="label" name="order-number">Номер заказа:</div>
 					<div class="label" name="order-count-cargo-spaces">Кол-во грузомест:</div>
+					<div class="label" name="printer">Принтер:</div>
 				</div>
 				<div id="sticker-input-block">
 					<input class="input" id="input-order-number" placeholder="Номер заказа">
 					<input class="input" id="input-order-count-cargo-spaces" placeholder="Кол-во грузомест" type="number" min="0" value="0">
+					<select class="input" id="input-select-printer">
+						<option></option>
+					</select>
 				</div>
 			</div>
 				<div id="sticker-buttons-block">
 					<div style="width: 100%;"></div>
-					<button id="print-button" onclick="mfstockGenerateEmployeeSticker();">Печать</button>
+					<button id="print-button" onclick="print();">Печать</button>
 				</div>
 			</div>
 			<script type="text/javascript">

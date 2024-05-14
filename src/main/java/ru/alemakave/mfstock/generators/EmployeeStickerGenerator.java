@@ -4,7 +4,7 @@ import com.google.zxing.WriterException;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.springframework.context.ConfigurableApplicationContext;
-import ru.alemakave.mfstock.model.json.EmployeeSticker;
+import ru.alemakave.mfstock.model.json.sticker.EmployeeSticker;
 import ru.alemakave.qr.ImageType;
 import ru.alemakave.qr.generator.QRGenerator;
 import ru.alemakave.slib.utils.ImageUtils;

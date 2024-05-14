@@ -3,7 +3,7 @@ package ru.alemakave.mfstock.generators;
 import com.google.zxing.WriterException;
 import org.apache.poi.ss.util.CellAddress;
 import org.springframework.context.ConfigurableApplicationContext;
-import ru.alemakave.mfstock.model.json.OrderNumberSticker;
+import ru.alemakave.mfstock.model.json.sticker.OrderNumberSticker;
 
 import java.io.File;
 import java.io.IOException;
