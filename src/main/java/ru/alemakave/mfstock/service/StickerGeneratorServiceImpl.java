@@ -325,6 +325,14 @@ public class StickerGeneratorServiceImpl implements IStickerService {
             }
 
             table.saveColumnsAccordingHeaders(columns);
+            jsoupDocument.getElementById("upload").append(String.format("<div style=\"\n" +
+                    "    background: #aaa;\n" +
+                    "    margin: 5px;\n" +
+                    "    margin-left: 20px;\n" +
+                    "    text-align: center;\n" +
+                    "    margin-right: 25px;\n" +
+                    "    font-size: 25px;\n" +
+                    "\">%s</div>", file.getOriginalFilename()));
             jsoupDocument.getElementById("upload").append(table.applyAsHtml());
 
             if (table.getRows().get(0).getCells().size() != inputs.size()) {
