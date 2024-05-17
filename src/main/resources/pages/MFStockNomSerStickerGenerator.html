@@ -18,11 +18,16 @@
     		$(document).ready(async function() {
         		let availablePrintersResponse = await $.getJSON("/mfstock-get-available-printers");
         		let availablePrinters = availablePrintersResponse.printers;
+        		let printerSelector = document.getElementById("input-select-printer");
 				for (var i = 0; i < availablePrinters.length; i++) {
 					var printerSelectOption = document.createElement("option");
 					printerSelectOption.textContent = availablePrinters[i];
-					document.getElementById("input-select-printer").appendChild(printerSelectOption);
+					printerSelector.appendChild(printerSelectOption);
 				}
+				printerSelector.onchange = function() {
+				    localStorage.setItem("printer", printerSelector.value);
+				}
+				printerSelector.value = localStorage.printer;
     		});
       		$("#upload-form").submit(function () {
 				return false;
@@ -41,6 +46,7 @@
 						<div class="label" name="nom-name">Наименование:</div>
 						<div class="label" name="nom-code">Код товара:</div>
 						<div class="label" name="nom-ser-num">СНИ:</div>
+						<dev class="label" name="nom-count">Кол-во:</dev>
 						<div class="label" name="sticker-copies" style="display: none;">Напечатать количество:</div>
 						<div class="label" name="printer">Принтер:</div>
 					</div>
@@ -48,6 +54,7 @@
 						<input class="input" id="input-nom-name" placeholder="Наименование">
 						<input class="input" id="input-nom-code" placeholder="Код">
 						<input class="input" id="input-nom-serial" placeholder="Серийный номер изг.">
+						<input class="input" id="input-nom-count" placeholder="Оп. ед">
 						<input class="input" id="input-sticker-copies" name="input-sticker-copies" type="number" min="1" value="1" style="display: none;">
 						<select class="input" id="input-select-printer">
 							<option></option>

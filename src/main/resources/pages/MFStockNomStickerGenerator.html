@@ -18,11 +18,16 @@
     		$(document).ready(async function() {
         		let availablePrintersResponse = await $.getJSON("/mfstock-get-available-printers");
         		let availablePrinters = availablePrintersResponse.printers;
+        		let printerSelector = document.getElementById("input-select-printer");
 				for (var i = 0; i < availablePrinters.length; i++) {
 					var printerSelectOption = document.createElement("option");
 					printerSelectOption.textContent = availablePrinters[i];
-					document.getElementById("input-select-printer").appendChild(printerSelectOption);
+					printerSelector.appendChild(printerSelectOption);
 				}
+				printerSelector.onchange = function() {
+				    localStorage.setItem("printer", printerSelector.value);
+				}
+				printerSelector.value = localStorage.printer;
     		});
       		$("#upload-form").submit(function () {
 				return false;
