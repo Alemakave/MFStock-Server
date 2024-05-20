@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -60,17 +61,7 @@ public class Table implements ToHtmlFunction {
     }
 
     public void saveColumnsAccordingHeaders(DBConfigsColumns... columnsConfig) {
-        int[] headersIndex = new int[columnsConfig.length];
-        for (int i = 0; i < columnsConfig.length; i++) {
-//            headersIndex[i] = rows.get(0).getCells().indexOf(new TableCell(columnsConfig[i].getHeaderText()));
-            final TableCell exceptedTableCell = new TableCell(columnsConfig[i].getHeaderText());
-            headersIndex[i] = ListUtils.indexOf(rows.get(0).getCells(), object ->
-                    object.toString().equalsIgnoreCase(exceptedTableCell.toString())
-            );
-        }
-
-        saveRowByIndexes(headersIndex);
-        System.gc();
+        saveColumnsAccordingHeaders(Arrays.asList(columnsConfig));
     }
 
     public void saveColumnsAccordingHeaders(List<DBConfigsColumns> columnsConfig) {
@@ -85,6 +76,30 @@ public class Table implements ToHtmlFunction {
 
         saveRowByIndexes(headersIndex);
         System.gc();
+    }
+
+    public void setColumnOrder(List<DBConfigsColumns> columnHeader) {
+        List<TableRow> orderedRows = new ArrayList<>(getRowsCount());
+
+        int[] headersIndex = new int[columnHeader.size()];
+        for (int i = 0; i < columnHeader.size(); i++) {
+            final TableCell exceptedTableCell = new TableCell(columnHeader.get(i).getHeaderText());
+            headersIndex[i] = ListUtils.indexOf(rows.get(0).getCells(), object ->
+                    object.toString().equalsIgnoreCase(exceptedTableCell.toString())
+            );
+        }
+
+        for (TableRow row : getRows()) {
+            TableRow orderedRow = new TableRow();
+
+            for (int i = 0; i < row.getCells().size(); i++) {
+                orderedRow.addCell(row.getCells().get(headersIndex[i]));
+            }
+
+            orderedRows.add(orderedRow);
+        }
+
+        setRows(orderedRows);
     }
 
     public void addColumnPrefix(DBConfigsColumns... configsColumns) {
