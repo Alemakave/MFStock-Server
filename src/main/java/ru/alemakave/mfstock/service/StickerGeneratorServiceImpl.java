@@ -112,9 +112,13 @@ public class StickerGeneratorServiceImpl implements IStickerService {
             final PrintStickerJson<NomSticker> printStickerJson = mapper.readValue(requestBody, PrintStickerJson.class);
             final NomSticker dta = printStickerJson.getSticker();
             final File stickerTempFile = new File(stickerTempFileName);
+            String printerName = printStickerJson.getSelectPrinter();
+            if (printerName == null || printerName.isEmpty()) {
+                printerName = configLoader.getMfStockConfig().getPrinterName();
+            }
             NomStickerGenerator nomStickerGenerator = new NomStickerGenerator(context);
             nomStickerGenerator.generate(stickerTempFile, dta.getCode(), dta.getName());
-            ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(configLoader.getMfStockConfig().getPrinterName());
+            ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(printerName);
             printConfiguration.setCopies(Integer.parseInt(dta.getCopies()));
             PrintUtils.printFile(stickerTempFile, printConfiguration);
             //noinspection ResultOfMethodCallIgnored
@@ -145,9 +149,13 @@ public class StickerGeneratorServiceImpl implements IStickerService {
             final PrintStickerJson<NomSerSticker> printStickerJson = mapper.readValue(requestBody, PrintStickerJson.class);
             final NomSerSticker dta = printStickerJson.getSticker();
             final File stickerTempFile = new File(stickerTempFileName);
+            String printerName = printStickerJson.getSelectPrinter();
+            if (printerName == null || printerName.isEmpty()) {
+                printerName = configLoader.getMfStockConfig().getPrinterName();
+            }
             NomSerStickerGenerator nomSerStickerGenerator = new NomSerStickerGenerator(context);
             nomSerStickerGenerator.generate(stickerTempFile, dta.getCode(), dta.getName(), dta.getSerial());
-            ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(configLoader.getMfStockConfig().getPrinterName());
+            ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(printerName);
             printConfiguration.setCopies(Integer.parseInt(dta.getCopies()));
             PrintUtils.printFile(stickerTempFile, printConfiguration);
             //noinspection ResultOfMethodCallIgnored
@@ -176,9 +184,13 @@ public class StickerGeneratorServiceImpl implements IStickerService {
             final PrintStickerJson<CellSticker> printStickerJson = mapper.readValue(requestBody, PrintStickerJson.class);
             final CellSticker dta = printStickerJson.getSticker();
             final File stickerTempFile = new File(stickerTempFileName);
+            String printerName = printStickerJson.getSelectPrinter();
+            if (printerName == null || printerName.isEmpty()) {
+                printerName = configLoader.getMfStockConfig().getPrinterName();
+            }
             CellStickerGenerator nomSerStickerGenerator = new CellStickerGenerator(context);
             nomSerStickerGenerator.generate(stickerTempFile, dta.getCellAddress(), dta.getCellCode());
-            ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(configLoader.getMfStockConfig().getPrinterName());
+            ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(printerName);
             printConfiguration.setCopies(1);
             PrintUtils.printFile(stickerTempFile, printConfiguration);
             //noinspection ResultOfMethodCallIgnored
@@ -214,12 +226,16 @@ public class StickerGeneratorServiceImpl implements IStickerService {
         mapper.registerModule(module);
 
         try {
-            final PrintStickerJson<EmployeeSticker> printData = mapper.readValue(requestBody, PrintStickerJson.class);
+            final PrintStickerJson<EmployeeSticker> printStickerJson = mapper.readValue(requestBody, PrintStickerJson.class);
             final File stickerTempFile = new File(stickerTempFileName);
+            String printerName = printStickerJson.getSelectPrinter();
+            if (printerName == null || printerName.isEmpty()) {
+                printerName = configLoader.getMfStockConfig().getPrinterName();
+            }
             EmployeeStickerGenerator employeeStickerGenerator = new EmployeeStickerGenerator(context);
-            employeeStickerGenerator.generate(stickerTempFile, printData.getSticker());
+            employeeStickerGenerator.generate(stickerTempFile, printStickerJson.getSticker());
 
-            ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(configLoader.getMfStockConfig().getPrinterName());
+            ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(printerName);
             printConfiguration.setCopies(1);
 
             PrintUtils.printFile(stickerTempFile, printConfiguration);
@@ -255,13 +271,17 @@ public class StickerGeneratorServiceImpl implements IStickerService {
         module.addDeserializer(PrintStickerJson.class, new OrderPrintStickerDeserializer());
         mapper.registerModule(module);
         try {
-            final PrintStickerJson<OrderNumberSticker> printData = mapper.readValue(requestBody, PrintStickerJson.class);
-            final OrderNumberSticker stickerData = printData.getSticker();
+            final PrintStickerJson<OrderNumberSticker> printStickerJson = mapper.readValue(requestBody, PrintStickerJson.class);
+            final OrderNumberSticker stickerData = printStickerJson.getSticker();
+            String printerName = printStickerJson.getSelectPrinter();
+            if (printerName == null || printerName.isEmpty()) {
+                printerName = configLoader.getMfStockConfig().getPrinterName();
+            }
             if (stickerData.orderCountCargoSpaces == 0) {
                 final File stickerTempFile = new File(stickerTempFileName);
                 OrderNumberStickerGenerator orderNumberStickerGenerator = new OrderNumberStickerGenerator(context);
                 orderNumberStickerGenerator.generate(stickerTempFile, stickerData, 0);
-                ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(configLoader.getMfStockConfig().getPrinterName());
+                ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(printerName);
                 printConfiguration.setCopies(1);
                 PrintUtils.printFile(stickerTempFile, printConfiguration);
                 //noinspection ResultOfMethodCallIgnored
@@ -271,7 +291,7 @@ public class StickerGeneratorServiceImpl implements IStickerService {
                     final File stickerTempFile = new File(stickerTempFileName);
                     OrderNumberStickerGenerator orderNumberStickerGenerator = new OrderNumberStickerGenerator(context);
                     orderNumberStickerGenerator.generate(stickerTempFile, stickerData, i + 1);
-                    ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(configLoader.getMfStockConfig().getPrinterName());
+                    ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(printerName);
                     printConfiguration.setCopies(1);
                     PrintUtils.printFile(stickerTempFile, printConfiguration);
                     //noinspection ResultOfMethodCallIgnored
@@ -317,11 +337,14 @@ public class StickerGeneratorServiceImpl implements IStickerService {
             List<Element> inputs =  jsoupDocument.getElementsByClass("input")
                     .stream()
                     .filter(element ->
-                            element.id().startsWith("input-nom") || element.id().startsWith("input-cell")
+                            (element.id().startsWith("input-nom") || element.id().startsWith("input-cell"))
+                         && (element.hasAttr("placeholder"))
                     )
                     .collect(Collectors.toList());
             for (Element element : inputs) {
-                columns.add(new DBConfigsColumns(element.attr("placeholder"), ""));
+                if (element.hasAttr("placeholder")) {
+                    columns.add(new DBConfigsColumns(element.attr("placeholder"), ""));
+                }
             }
 
             table.saveColumnsAccordingHeaders(columns);
@@ -342,11 +365,17 @@ public class StickerGeneratorServiceImpl implements IStickerService {
 
             for (Element tableRow : jsoupDocument.getElementsByClass("table-header")) {
                 tableRow.child(0).before("<div class=\"table-header-cell\"><input type=\"checkbox\" class=\"selectAllInColumn\"/></div>");
+                tableRow.child(tableRow.childrenSize() - 1).after("<div class=\"table-header-cell\">Кол-во на печать</div>");
                 tableRow.child(tableRow.childrenSize() - 1).after("<div id=\"table-close-button\" onclick=\"closeTable()\"><img src=\"/get-image?name=close.svg\" id=\"close-image\"\"></div>");
             }
 
             for (Element tableRow : jsoupDocument.getElementsByClass("table-row")) {
                 tableRow.child(0).before("<div class=\"table-cell\"><input type=\"checkbox\" class=\"selectRow\"/></div>");
+                tableRow.child(tableRow.childrenSize() - 1).after("<div class=\"table-cell\"><input class=\"table-print-count\" type=\"number\" min=\"0\" value=\"1\" max=\"9999\" maxlength=\"4\" style=\"\n" +
+                        "    width: -webkit-fill-available;\n" +
+                        "    width: -moz-available;\n" +
+                        "    width: fill-available;\n" +
+                        "\"></div>");
             }
 
             jsoupDocument.getElementById("print-button").text("Напечатать выбранное");

@@ -15,6 +15,6 @@ public class NomSticker implements Sticker {
     private String code;
     @JsonProperty("NomName")
     private String name;
-    @JsonProperty("StickerCopies")
+    @JsonProperty("NomStickerCopies")
     private String copies;
 }

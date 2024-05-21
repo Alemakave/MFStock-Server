@@ -1,6 +1,7 @@
 function markInputBoxWithColumnIds() {
         var headerCells = document.getElementsByClassName("table-header-cell");
         var inputLabels = document.getElementsByClassName("input");
+        var labels = document.getElementsByClassName("label");
 
         for (var i = 0; i < headerCells.length; i++) {
             for (var j = 0; j < inputLabels.length; j++) {
@@ -9,13 +10,13 @@ function markInputBoxWithColumnIds() {
                 }
 
                 var headerCellText = headerCells[i].textContent.toLowerCase().trim();
+                var labelText = labels[j].textContent.toLowerCase().trim().replace(":", "");
                 var inputLabelText = inputLabels[j].placeholder.toLowerCase();
 
-                if (!headerCellText || !inputLabelText) {
-                    continue;
-                }
-
-                if (headerCellText == inputLabelText) {
+                if (
+                    (headerCellText && inputLabelText && headerCellText == inputLabelText)
+                     || labelText == headerCellText
+                ) {
                     inputLabels[j].classList.add("column_" + i);
                     break;
                 }
@@ -51,7 +52,15 @@ async function printSelectedNomenclatures() {
         }
 
         for (var j = 0; j < printDataIdsMap.length; j++) {
-            var content = selectRow.parentElement.parentElement.children[printDataIdsMap[j]].textContent.trim();
+            var content;
+            var contentElement = selectRow.parentElement.parentElement.children[printDataIdsMap[j]];
+            if (contentElement.children.length == 0) {
+                content = contentElement.textContent.trim();
+            } else {
+                if (contentElement.children[0].tagName == "INPUT") {
+                    content = contentElement.children[0].value;
+                }
+            }
             console.log(content);
             document.getElementsByClassName("column_" + printDataIdsMap[j])[0].value = content;
         }
@@ -62,8 +71,13 @@ async function printSelectedNomenclatures() {
     }
 
     for (var j = 0; j < printDataIdsMap.length; j++) {
-        document.getElementsByClassName("column_" + printDataIdsMap[j])[0].disabled = "";
-        document.getElementsByClassName("column_" + printDataIdsMap[j])[0].value = "";
+        var inputForPrintElement = document.getElementsByClassName("column_" + printDataIdsMap[j])[0];
+        inputForPrintElement.disabled = "";
+        if (inputForPrintElement.hasAttribute("value")) {
+            inputForPrintElement.value = inputForPrintElement.getAttribute("value");
+        } else {
+            inputForPrintElement.value = "";
+        }
     }
 }
 
