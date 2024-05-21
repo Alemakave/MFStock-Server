@@ -28,6 +28,12 @@
 				    localStorage.setItem("printer", printerSelector.value);
 				}
 				printerSelector.value = localStorage.printer;
+
+				let printFilenameAfterPrintStickers = document.getElementById("printFilenameAfterPrintStickers");
+				printFilenameAfterPrintStickers.onchange = function() {
+					localStorage.setItem("printFilenameAfterPrintStickers", printFilenameAfterPrintStickers.checked)
+				}
+				printFilenameAfterPrintStickers.checked = localStorage.printFilenameAfterPrintStickers == "true";
     		});
       		$("#upload-form").submit(function () {
 				return false;

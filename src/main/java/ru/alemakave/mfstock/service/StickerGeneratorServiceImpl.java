@@ -348,7 +348,7 @@ public class StickerGeneratorServiceImpl implements IStickerService {
             }
 
             table.saveColumnsAccordingHeaders(columns);
-            jsoupDocument.getElementById("upload").append(String.format("<div style=\"\n" +
+            jsoupDocument.getElementById("upload").append(String.format("<div id=\"tableFilename\" style=\"\n" +
                     "    background: #aaa;\n" +
                     "    margin: 5px;\n" +
                     "    margin-left: 20px;\n" +
@@ -377,6 +377,15 @@ public class StickerGeneratorServiceImpl implements IStickerService {
                         "    width: fill-available;\n" +
                         "\"></div>");
             }
+
+            jsoupDocument.getElementById("sticker-buttons-block").child(0).remove();
+            jsoupDocument.getElementById("sticker-buttons-block").child(0).before("<div style=\"\n" +
+                    "    display: flex;\n" +
+                    "    width: 100%;\n" +
+                    "\">\n" +
+                    "        <input type=\"checkbox\" name=\"printFilenameAfterPrintStickers\" id=\"printFilenameAfterPrintStickers\">\n" +
+                    "        <label for=\"printFilenameAfterPrintStickers\" class=\"label\" style=\"height: 40px;line-height: 40px;margin: 0;\">Напечатать после наклейку с именем файла</label>\n" +
+                    "    </div>");
 
             jsoupDocument.getElementById("print-button").text("Напечатать выбранное");
             jsoupDocument.getElementById("print-button").attr("onclick", "printSelectedNomenclatures();");
