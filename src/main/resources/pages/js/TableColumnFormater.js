@@ -70,6 +70,26 @@ async function printSelectedNomenclatures() {
         selectRow.parentElement.parentElement.style.background = colorBuffer;
     }
 
+    let printFilenameAfterPrintStickers = document.getElementById("printFilenameAfterPrintStickers");
+    if (printFilenameAfterPrintStickers.checked) {
+        json = "{";
+        json += "\"SelectPrinter\": \"" + inputs['input-select-printer'].value + "\",";
+        json += "\"Sticker\": {";
+        json += "\"OrderNumber\": \"" + document.getElementById("tableFilename").textContent.trim().split(".")[0] + "\", ";
+        json += "\"OrderCountCargoSpaces\": 0";
+        json += "}"
+        json += "}"
+        json = json.replaceAll("\\", "\\\\")
+
+        await fetch("/mfstock-generate-order-number-sticker", {
+            method: 'POST',
+            body: json,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+    }
+
     for (var j = 0; j < printDataIdsMap.length; j++) {
         var inputForPrintElement = document.getElementsByClassName("column_" + printDataIdsMap[j])[0];
         inputForPrintElement.disabled = "";

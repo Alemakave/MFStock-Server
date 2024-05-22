@@ -41,24 +41,4 @@ async function print() {
                 'Content-Type': 'application/json'
             }
         });
-
-    let printFilenameAfterPrintStickers = document.getElementById("printFilenameAfterPrintStickers");
-    if (printFilenameAfterPrintStickers.checked) {
-        json = "{";
-        json += "\"SelectPrinter\": \"" + inputs['input-select-printer'].value + "\",";
-        json += "\"Sticker\": {";
-        json += "\"OrderNumber\": \"" + document.getElementById("tableFilename").textContent.trim().split(".")[0] + "\", ";
-        json += "\"OrderCountCargoSpaces\": 0";
-        json += "}"
-        json += "}"
-        json = json.replaceAll("\\", "\\\\")
-
-        await fetch("/mfstock-generate-order-number-sticker", {
-            method: 'POST',
-            body: json,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-    }
 }
