@@ -13,54 +13,59 @@ function injectDatabaseFunctions() {
         filler.style.left = "0";
         filler.style.alignContent = "center";
 
-        var loadingElement = document.createElement("div");
-        loadingElement.style.cssText = "background-image: url(\"/get-image?name=loading.svg\"); width: 100px; height: 100px; background-repeat: no-repeat; background-size: contain;filter: invert(1) drop-shadow(2px 4px 6px black);transition: all 0.5s ease-in;animation-name: rotate;animation-duration: 3s;animation-iteration-count: infinite;animation-timing-function: linear;margin: auto;";
-        filler.appendChild(loadingElement);
-
-        document.body.appendChild(filler);
-        await fetch("/mfstock-reload-db");
-        document.getElementsByClassName("filler")[0].children[0].remove();
-        filler.style.alignContent = "";
-
         var continueInfo = document.createElement("div");
-        continueInfo.style.cssText = "background: white;width: 20vw;height: 10vw;margin: auto;border-radius: 2vw;filter: drop-shadow(gray 2px 4px 6px);align-content: center;margin-top: 15vh;";
+        continueInfo.classList.add("reloadContainer");
+        continueInfo.style.background = "white";
+        continueInfo.style.width = "20vw";
+        continueInfo.style.height = "10vw";
+        continueInfo.style.margin = "15vh auto";
+        continueInfo.style.borderRadius = "0.7vw";
+        continueInfo.style.filter = "drop-shadow(gray 2px 4px 6px)";
+        continueInfo.style.alignContent = "center";
+        continueInfo.style.padding = "0.7vw 0";
+        continueInfo.style.position = "relative";
+        continueInfo.style.top = "-25vh";
 
         var continueInfoText = document.createElement("div");
-        continueInfoText.style.cssText = "padding-bottom: 5vw;text-align: center;";
-        continueInfoText.textContent = "БД перезагружена";
+        continueInfoText.classList.add("reloadInfo");
+        continueInfoText.style.cssText = "text-align: center;";
+        continueInfoText.textContent = "Перезагрузка БД";
         continueInfo.appendChild(continueInfoText);
 
-        var continueInfoCloseButton = document.createElement("div");
-        continueInfoCloseButton.style.cssText = "width: 60px;height: 24px;line-height: 24px;margin: auto;background: gray;border-radius: 3px;text-align: center;padding: 2px;cursor: pointer;";
-        continueInfoCloseButton.classList.add("filler-close-button");
-        continueInfoCloseButton.textContent = "ОК (5)";
+        var loadingElement = document.createElement("div");
+        loadingElement.classList.add("reloadingImage");
+        loadingElement.style.cssText = "background-image: url(\"/get-image?name=loading.svg\");width: 100px;height: 100px;background-repeat: no-repeat;background-size: contain;transition: all 0.5s ease-in 0s;animation-name: rotate;animation-duration: 2s;animation-iteration-count: infinite;animation-timing-function: linear;margin: 1vw auto;";
+        continueInfo.appendChild(loadingElement);
 
-        var closeButtonTimerId = timer(
-            (timerCurrentSecond) => {
-                document.getElementsByClassName("filler-close-button")[0].textContent = "ОК (" + (5 - timerCurrentSecond - 1) + ")";
-            },
+        document.body.appendChild(filler);
+        document.getElementsByClassName("filler")[0].appendChild(continueInfo);
+
+        await fetch("/mfstock-reload-db");
+
+        continueInfoText.textContent = "БД перезагружена";
+        loadingElement.style.animationName = "";
+        loadingElement.style.backgroundImage = "url(\"/get-image?name=loading-complete.svg\")";
+
+        timer(
+            null,
             5,
             () => document.getElementsByClassName(filler.className)[0].remove()
-        );
-
-        continueInfoCloseButton.onclick = () => {
-            clearInterval(closeButtonTimerId);
-            document.getElementsByClassName(filler.className)[0].remove();
-        };
-
-        continueInfo.appendChild(continueInfoCloseButton);
-        document.getElementsByClassName("filler")[0].appendChild(continueInfo);
+        )
     }
 }
 
 function timer(func, timeoutSecond, doneFunc) {
     var timerCurrentSecond = 0;
     var timerId = setInterval(() => {
-            func(timerCurrentSecond);
+            if (func != null) {
+                func(timerCurrentSecond);
+            }
             timerCurrentSecond++;
             if (timerCurrentSecond >= timeoutSecond) {
                 clearInterval(timerId);
-                doneFunc();
+                if (doneFunc != null) {
+                    doneFunc();
+                }
             }
     }, 1000);
     return timerId;

@@ -42,3 +42,80 @@ async function print() {
             }
         });
 }
+
+async function printSelectedNomenclatures() {
+    var inputLabels = document.getElementsByClassName("input");
+    var printDataIdsMap = [];
+
+    for (var i = 0; i < inputLabels.length; i++) {
+        var inputLabel = inputLabels[i];
+
+        if (!containsValueStartWith(inputLabel.classList, "column_")) {
+            continue;
+        }
+
+        var columnId = parseInt(inputLabel.classList[1].split("_")[1]);
+        inputLabel.disabled = "disabled";
+        printDataIdsMap.push(columnId);
+    }
+
+    var selectRows = document.getElementsByClassName("selectRow");
+    for (var i = 0; i < selectRows.length; i++) {
+        var selectRow = selectRows[i];
+        var colorBuffer =  selectRow.parentElement.parentElement.style.background;
+        selectRow.parentElement.parentElement.style.background = "#AAAAAA";
+
+        if (!selectRow.checked) {
+            selectRow.parentElement.parentElement.style.background = colorBuffer;
+            continue;
+        }
+
+        for (var j = 0; j < printDataIdsMap.length; j++) {
+            var content;
+            var contentElement = selectRow.parentElement.parentElement.children[printDataIdsMap[j]];
+            if (contentElement.children.length == 0) {
+                content = contentElement.textContent.trim();
+            } else {
+                if (contentElement.children[0].tagName == "INPUT") {
+                    content = contentElement.children[0].value;
+                }
+            }
+            console.log(content);
+            document.getElementsByClassName("column_" + printDataIdsMap[j])[0].value = content;
+        }
+
+        await print();
+
+        selectRow.parentElement.parentElement.style.background = colorBuffer;
+    }
+
+    let printFilenameAfterPrintStickers = document.getElementById("printFilenameAfterPrintStickers");
+    if (printFilenameAfterPrintStickers.checked) {
+        json = "{";
+        json += "\"SelectPrinter\": \"" + inputs['input-select-printer'].value + "\",";
+        json += "\"Sticker\": {";
+        json += "\"OrderNumber\": \"" + document.getElementById("tableFilename").textContent.trim().split(".")[0] + "\", ";
+        json += "\"OrderCountCargoSpaces\": 0";
+        json += "}"
+        json += "}"
+        json = json.replaceAll("\\", "\\\\")
+
+        await fetch("/mfstock-generate-order-number-sticker", {
+            method: 'POST',
+            body: json,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+    }
+
+    for (var j = 0; j < printDataIdsMap.length; j++) {
+        var inputForPrintElement = document.getElementsByClassName("column_" + printDataIdsMap[j])[0];
+        inputForPrintElement.disabled = "";
+        if (inputForPrintElement.hasAttribute("value")) {
+            inputForPrintElement.value = inputForPrintElement.getAttribute("value");
+        } else {
+            inputForPrintElement.value = "";
+        }
+    }
+}

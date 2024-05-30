@@ -10,6 +10,8 @@ import ru.alemakave.mfstock.service.IStickerService;
 
 import java.io.*;
 
+import static ru.alemakave.mfstock.model.StickerType.*;
+
 @RestController
 public class StickerGeneratorController {
     private final IStickerService generatorService;
@@ -83,28 +85,28 @@ public class StickerGeneratorController {
     }
 
     @PostMapping(path = "/mfstock-generate-nom-ser-sticker", consumes = "application/json")
-    public String postNomSerStickerGenerator(@RequestBody String requestBody) {
-        return generatorService.postNomSerStickerGenerator(requestBody);
+    public void postNomSerStickerGenerator(@RequestBody String requestBody) {
+        generatorService.postPrintSticker(requestBody, NOM_SERIAL);
     }
 
     @PostMapping(path = "/mfstock-generate-nom-sticker", consumes = "application/json")
-    public String postNomStickerGenerator(@RequestBody String requestBody) {
-        return generatorService.postNomStickerGenerator(requestBody);
+    public void postNomStickerGenerator(@RequestBody String requestBody) {
+        generatorService.postPrintSticker(requestBody, NOM);
     }
 
     @PostMapping(path = "/mfstock-generate-cell-sticker", consumes = "application/json")
-    public String postCellStickerGenerator(@RequestBody String requestBody) {
-        return generatorService.postCellStickerGenerator(requestBody);
+    public void postCellStickerGenerator(@RequestBody String requestBody) {
+        generatorService.postPrintSticker(requestBody, CELL);
     }
 
     @PostMapping(path = "/mfstock-generate-employee-sticker", consumes = "application/json")
-    public String postEmployeeStickerGenerator(@RequestBody String requestBody) {
-        return generatorService.postEmployeeStickerGenerator(requestBody);
+    public void postEmployeeStickerGenerator(@RequestBody String requestBody) {
+        generatorService.postPrintSticker(requestBody, EMPLOYEE);
     }
 
     @PostMapping(path = "/mfstock-generate-order-number-sticker", consumes = "application/json")
-    public String postOrderNumberStickerGenerator(@RequestBody String requestBody) {
-        return generatorService.postOrderNumberStickerGenerator(requestBody);
+    public void postOrderNumberStickerGenerator(@RequestBody String requestBody) {
+        generatorService.postPrintSticker(requestBody, ORDER_NUMBER);
     }
 
     @PostMapping(path = "/mfstock-generate-cell-sticker")
@@ -120,6 +122,11 @@ public class StickerGeneratorController {
     @PostMapping(path = "/mfstock-generate-nom-ser-sticker")
     public ResponseEntity<String> postNomSerStickerUploadFile(@RequestParam("data-file") MultipartFile file) {
         return generatorService.uploadStickersDataTable(file, getNomSerStickerGenerator());
+    }
+
+    @GetMapping(path = "/mfstock-get-sticker-file")
+    public ResponseEntity<byte[]> getStickerFile(@RequestParam("id") String uuidStr) {
+        return generatorService.getStickerFile(uuidStr);
     }
 
     @ExceptionHandler({RuntimeException.class})

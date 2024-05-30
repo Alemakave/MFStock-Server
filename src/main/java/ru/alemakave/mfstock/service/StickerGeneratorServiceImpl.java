@@ -1,9 +1,6 @@
 package ru.alemakave.mfstock.service;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.google.zxing.WriterException;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.jsoup.Jsoup;
@@ -11,6 +8,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,11 +17,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.util.StringUtils;
 import ru.alemakave.mfstock.configs.MFStockConfigLoader;
-import ru.alemakave.mfstock.databind.deserializer.*;
+import ru.alemakave.mfstock.exceptions.RuntimeIOException;
+import ru.alemakave.mfstock.exceptions.StickerGeneratorNotRegisteredException;
 import ru.alemakave.mfstock.exceptions.StickerTableException;
 import ru.alemakave.mfstock.generators.*;
+import ru.alemakave.mfstock.model.StickerType;
 import ru.alemakave.mfstock.model.configs.DBConfigsColumns;
 import ru.alemakave.mfstock.model.json.PrintStickerJson;
+import ru.alemakave.mfstock.model.json.StickerFileUUID;
 import ru.alemakave.mfstock.model.json.sticker.*;
 import ru.alemakave.mfstock.model.table.Table;
 import ru.alemakave.mfstock.model.table.TableCell;
@@ -34,15 +35,18 @@ import ru.alemakave.slib.utils.ArrayUtils;
 import ru.alemakave.slib.utils.PrintUtils;
 import ru.alemakave.slib.utils.function.Function;
 
-import javax.print.PrintException;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static ru.alemakave.mfstock.model.StickerType.*;
+import static ru.alemakave.mfstock.utils.JsonMapperUtils.getStickerDeserializedMapper;
 
 @Service
 public class StickerGeneratorServiceImpl implements IStickerService {
@@ -55,10 +59,19 @@ public class StickerGeneratorServiceImpl implements IStickerService {
     private static final Logger log = LoggerFactory.getLogger(StickerGeneratorServiceImpl.class);
     private final MFStockConfigLoader configLoader;
     private final ConfigurableApplicationContext context;
+    private final Map<StickerType, StickerGenerator> registeredStickerGenerators = new HashMap<>();
+    public final String stickerDir;
+    public final String stickerFileDateTimeFormat = "yyyyMMdd-HHmmss";
 
-    public StickerGeneratorServiceImpl(MFStockConfigLoader configLoader, ConfigurableApplicationContext configurableApplicationContext) {
+    public StickerGeneratorServiceImpl(MFStockConfigLoader configLoader, ConfigurableApplicationContext configurableApplicationContext, @Value("${mfstock.sticker.generated.folder.path:./generated_sticker}") String stickerDir) {
         this.configLoader = configLoader;
         this.context = configurableApplicationContext;
+        this.stickerDir = stickerDir;
+        registeredStickerGenerators.put(CELL, new CellStickerGenerator(configurableApplicationContext));
+        registeredStickerGenerators.put(EMPLOYEE, new EmployeeStickerGenerator(configurableApplicationContext));
+        registeredStickerGenerators.put(NOM, new NomStickerGenerator(configurableApplicationContext));
+        registeredStickerGenerators.put(NOM_SERIAL, new NomSerStickerGenerator(configurableApplicationContext));
+        registeredStickerGenerators.put(ORDER_NUMBER, new OrderNumberStickerGenerator(configurableApplicationContext));
     }
 
     @Override
@@ -98,114 +111,6 @@ public class StickerGeneratorServiceImpl implements IStickerService {
     }
 
     @Override
-    public String postNomStickerGenerator(String requestBody) {
-        log.info(String.format("postNomStickerGenerator(%s)", requestBody));
-        final String stickerTempFileName = "nom_sticker.xlt";
-        final ObjectMapper mapper = new ObjectMapper()
-                .disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES)
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(PrintStickerJson.class, new NomPrintStickerDeserializer());
-        mapper.registerModule(module);
-
-        try {
-            final PrintStickerJson<NomSticker> printStickerJson = mapper.readValue(requestBody, PrintStickerJson.class);
-            final NomSticker dta = printStickerJson.getSticker();
-            final File stickerTempFile = new File(stickerTempFileName);
-            String printerName = printStickerJson.getSelectPrinter();
-            if (printerName == null || printerName.isEmpty()) {
-                printerName = configLoader.getMfStockConfig().getPrinterName();
-            }
-            NomStickerGenerator nomStickerGenerator = new NomStickerGenerator(context);
-            nomStickerGenerator.generate(stickerTempFile, dta.getCode(), dta.getName());
-            ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(printerName);
-            printConfiguration.setCopies(Integer.parseInt(dta.getCopies()));
-            PrintUtils.printFile(stickerTempFile, printConfiguration);
-            //noinspection ResultOfMethodCallIgnored
-            stickerTempFile.delete();
-        } catch (IOException | PrintException | WriterException e) {
-            log.error(String.format("%s: %s: %s", e.getClass().getName(), getClass().getName(), e.getMessage()));
-            for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-                log.error("\t" + stackTraceElement.toString());
-            }
-            throw new RuntimeException(e);
-        }
-
-        return requestBody;
-    }
-
-    @Override
-    public String postNomSerStickerGenerator(String requestBody) {
-        log.info(String.format("postNomSerStickerGenerator(%s)", requestBody));
-        final String stickerTempFileName = "nom_ser_sticker.xlt";
-        final ObjectMapper mapper = new ObjectMapper()
-                .disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES)
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(PrintStickerJson.class, new NomSerPrintStickerDeserializer());
-        mapper.registerModule(module);
-
-        try {
-            final PrintStickerJson<NomSerSticker> printStickerJson = mapper.readValue(requestBody, PrintStickerJson.class);
-            final NomSerSticker dta = printStickerJson.getSticker();
-            final File stickerTempFile = new File(stickerTempFileName);
-            String printerName = printStickerJson.getSelectPrinter();
-            if (printerName == null || printerName.isEmpty()) {
-                printerName = configLoader.getMfStockConfig().getPrinterName();
-            }
-            NomSerStickerGenerator nomSerStickerGenerator = new NomSerStickerGenerator(context);
-            nomSerStickerGenerator.generate(stickerTempFile, dta.getCode(), dta.getName(), dta.getSerial());
-            ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(printerName);
-            printConfiguration.setCopies(Integer.parseInt(dta.getCopies()));
-            PrintUtils.printFile(stickerTempFile, printConfiguration);
-            //noinspection ResultOfMethodCallIgnored
-            stickerTempFile.delete();
-        } catch (IOException | PrintException | WriterException e) {
-            log.error(String.format("%s: %s: %s", e.getClass().getName(), getClass().getName(), e.getMessage()));
-            for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-                log.error("\t" + stackTraceElement.toString());
-            }
-            throw new RuntimeException(e);
-        }
-        return requestBody;
-    }
-
-    @Override
-    public String postCellStickerGenerator(String requestBody) {
-        log.info(String.format("postCellStickerGenerator(%s)", requestBody));
-        final String stickerTempFileName = "cell_sticker.xlt";
-        final ObjectMapper mapper = new ObjectMapper()
-                .disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES)
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(PrintStickerJson.class, new CellPrintStickerDeserializer());
-        mapper.registerModule(module);
-        try {
-            final PrintStickerJson<CellSticker> printStickerJson = mapper.readValue(requestBody, PrintStickerJson.class);
-            final CellSticker dta = printStickerJson.getSticker();
-            final File stickerTempFile = new File(stickerTempFileName);
-            String printerName = printStickerJson.getSelectPrinter();
-            if (printerName == null || printerName.isEmpty()) {
-                printerName = configLoader.getMfStockConfig().getPrinterName();
-            }
-            CellStickerGenerator nomSerStickerGenerator = new CellStickerGenerator(context);
-            nomSerStickerGenerator.generate(stickerTempFile, dta.getCellAddress(), dta.getCellCode());
-            ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(printerName);
-            printConfiguration.setCopies(1);
-            PrintUtils.printFile(stickerTempFile, printConfiguration);
-            //noinspection ResultOfMethodCallIgnored
-            stickerTempFile.delete();
-        } catch (IOException | PrintException | WriterException e) {
-            log.error(String.format("%s: %s: %s", e.getClass().getName(), getClass().getName(), e.getMessage()));
-            for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-                log.error("\t" + stackTraceElement.toString());
-            }
-            throw new RuntimeException(e);
-        }
-        return requestBody;
-    }
-
-    @Override
     public String getEmployeeStickerGenerator() throws IOException {
         try (InputStream pageEmployeeStickerInputStream = context.getResource(PAGE_EMPLOYEE_STICKER_RESOURCE_LOCATION).getInputStream()) {
             try (BufferedInputStream bufferedPageNomSerStickerInputStream = new BufferedInputStream(pageEmployeeStickerInputStream)) {
@@ -215,97 +120,12 @@ public class StickerGeneratorServiceImpl implements IStickerService {
     }
 
     @Override
-    public String postEmployeeStickerGenerator(String requestBody) {
-        log.info(String.format("postEmployeeStickerGenerator(%s)", requestBody));
-        final String stickerTempFileName = "employee_sticker.xlt";
-        final ObjectMapper mapper = new ObjectMapper()
-                .disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES)
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(PrintStickerJson.class, new EmployeePrintStickerDeserializer());
-        mapper.registerModule(module);
-
-        try {
-            final PrintStickerJson<EmployeeSticker> printStickerJson = mapper.readValue(requestBody, PrintStickerJson.class);
-            final File stickerTempFile = new File(stickerTempFileName);
-            String printerName = printStickerJson.getSelectPrinter();
-            if (printerName == null || printerName.isEmpty()) {
-                printerName = configLoader.getMfStockConfig().getPrinterName();
-            }
-            EmployeeStickerGenerator employeeStickerGenerator = new EmployeeStickerGenerator(context);
-            employeeStickerGenerator.generate(stickerTempFile, printStickerJson.getSticker());
-
-            ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(printerName);
-            printConfiguration.setCopies(1);
-
-            PrintUtils.printFile(stickerTempFile, printConfiguration);
-            //noinspection ResultOfMethodCallIgnored
-            stickerTempFile.delete();
-        } catch (IOException | PrintException | WriterException e) {
-            log.error(String.format("%s: %s: %s", e.getClass().getName(), getClass().getName(), e.getMessage()));
-            for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-                log.error("\t" + stackTraceElement.toString());
-            }
-            throw new RuntimeException(e);
-        }
-        return requestBody;
-    }
-
-    @Override
     public String getOrderNumberStickerGenerator() throws IOException {
         try (InputStream pageEmployeeStickerInputStream = context.getResource(PAGE_ORDER_NUMBER_STICKER_RESOURCE_LOCATION).getInputStream()) {
             try (BufferedInputStream bufferedPageNomSerStickerInputStream = new BufferedInputStream(pageEmployeeStickerInputStream)) {
                 return new String(bufferedPageNomSerStickerInputStream.readAllBytes());
             }
         }
-    }
-
-    @Override
-    public String postOrderNumberStickerGenerator(String requestBody) {
-        log.info(String.format("postOrderNumberStickerGenerator(%s)", requestBody));
-        final String stickerTempFileName = "order_number_sticker.xlt";
-        final ObjectMapper mapper = new ObjectMapper()
-                .disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES)
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(PrintStickerJson.class, new OrderPrintStickerDeserializer());
-        mapper.registerModule(module);
-        try {
-            final PrintStickerJson<OrderNumberSticker> printStickerJson = mapper.readValue(requestBody, PrintStickerJson.class);
-            final OrderNumberSticker stickerData = printStickerJson.getSticker();
-            String printerName = printStickerJson.getSelectPrinter();
-            if (printerName == null || printerName.isEmpty()) {
-                printerName = configLoader.getMfStockConfig().getPrinterName();
-            }
-            if (stickerData.orderCountCargoSpaces == 0) {
-                final File stickerTempFile = new File(stickerTempFileName);
-                OrderNumberStickerGenerator orderNumberStickerGenerator = new OrderNumberStickerGenerator(context);
-                orderNumberStickerGenerator.generate(stickerTempFile, stickerData, 0);
-                ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(printerName);
-                printConfiguration.setCopies(1);
-                PrintUtils.printFile(stickerTempFile, printConfiguration);
-                //noinspection ResultOfMethodCallIgnored
-                stickerTempFile.delete();
-            } else {
-                for (int i = 0; i < stickerData.orderCountCargoSpaces; i++) {
-                    final File stickerTempFile = new File(stickerTempFileName);
-                    OrderNumberStickerGenerator orderNumberStickerGenerator = new OrderNumberStickerGenerator(context);
-                    orderNumberStickerGenerator.generate(stickerTempFile, stickerData, i + 1);
-                    ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(printerName);
-                    printConfiguration.setCopies(1);
-                    PrintUtils.printFile(stickerTempFile, printConfiguration);
-                    //noinspection ResultOfMethodCallIgnored
-                    stickerTempFile.delete();
-                }
-            }
-        } catch (IOException | PrintException | WriterException e) {
-            log.error(String.format("%s: %s: %s", e.getClass().getName(), getClass().getName(), e.getMessage()));
-            for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-                log.error("\t" + stackTraceElement.toString());
-            }
-            throw new RuntimeException(e);
-        }
-        return requestBody;
     }
 
     @Override
@@ -406,6 +226,89 @@ public class StickerGeneratorServiceImpl implements IStickerService {
         }
     }
 
+    @Override
+    public ResponseEntity<byte[]> getStickerFile(String uuidStr) {
+        UUID uuid = UUID.fromString(uuidStr);
+
+        File file = new File(stickerDir, uuid + ".xlt");
+        if (!file.exists()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        try (FileInputStream fis = new FileInputStream(file)) {
+            return ResponseEntity.ok(fis.readAllBytes());
+        } catch (IOException exception) {
+            log.error(String.format("%s: %s: %s", exception.getClass().getName(), getClass().getName(), exception.getMessage()));
+            for (StackTraceElement stackTraceElement : exception.getStackTrace()) {
+                log.error("\t" + stackTraceElement.toString());
+            }
+            throw new RuntimeException(exception);
+        }
+    }
+
+    @Override
+    public ResponseEntity<List<String>> postGenerateStickerExcelFile(String requestBody, StickerType stickerType) {
+        checkStickerFolder();
+        final ObjectMapper mapper = getStickerDeserializedMapper(stickerType.getPrintStickerDeserializer());
+        try {
+            final PrintStickerJson<?> printStickerJson = mapper.readValue(requestBody, PrintStickerJson.class);
+
+            Sticker sticker = printStickerJson.getSticker();
+
+            StickerFileUUID fileUUID = new StickerFileUUID(UUID.nameUUIDFromBytes(requestBody.getBytes()));
+            File stickerFile = new File(stickerDir, String.format("%s+%s.xlt", fileUUID.getStickerFileUUID(), DateTimeFormatter.ofPattern(stickerFileDateTimeFormat).format(LocalDateTime.now())));
+
+            ArrayList<String> fileNames = new ArrayList<>();
+
+            if (!registeredStickerGenerators.containsKey(stickerType)) {
+                throw new StickerGeneratorNotRegisteredException("Sticker generator not registered");
+            }
+
+            registeredStickerGenerators.get(stickerType).generate(stickerFile, sticker).forEach(path -> fileNames.add(path.getName()));
+            return ResponseEntity.ok(fileNames);
+        } catch (Exception e) {
+            log.error(String.format("%s: %s: %s", e.getClass().getName(), getClass().getName(), e.getMessage()));
+            for (StackTraceElement stackTraceElement : e.getStackTrace()) {
+                log.error("\t" + stackTraceElement.toString());
+            }
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void postPrintSticker(String requestBody, StickerType stickerType) {
+        log.info(String.format("postPrintSticker(%s)", requestBody));
+
+        ResponseEntity<List<String>> responseEntity = postGenerateStickerExcelFile(requestBody, stickerType);
+        final ObjectMapper mapper = getStickerDeserializedMapper(stickerType.getPrintStickerDeserializer());
+
+        try {
+            final PrintStickerJson<?> printStickerJson = mapper.readValue(requestBody, PrintStickerJson.class);
+
+            String printerName = printStickerJson.getSelectPrinter();
+            if (printerName == null || printerName.isEmpty()) {
+                printerName = configLoader.getMfStockConfig().getPrinterName();
+            }
+
+            ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(printerName);
+            printConfiguration.setCopies(1);
+
+            for (String stickerFileUUID : Objects.requireNonNull(responseEntity.getBody())){
+                File stickerFile = new File(stickerDir, stickerFileUUID);
+                PrintUtils.printFile(stickerFile, printConfiguration);
+            }
+
+            ResponseEntity.ok().build();
+        } catch (Exception e) {
+            log.error(String.format("%s: %s: %s", e.getClass().getName(), getClass().getName(), e.getMessage()));
+            for (StackTraceElement stackTraceElement : e.getStackTrace()) {
+                log.error("\t" + stackTraceElement.toString());
+            }
+            throw new RuntimeException(e);
+        }
+
+    }
+
     private void validateTable(Table table) {
         for (int i = 0; i < table.getRowsCount(); i++) {
             TableRow row = table.getRows().get(i);
@@ -415,6 +318,32 @@ public class StickerGeneratorServiceImpl implements IStickerService {
                     throw new StickerTableException(String.format("Загруженная таблица содержит недопустимые типы ячеек. Просьба загрузить таблицу только с текстовым типом ячеек. Обнаружена ячейка [%s:%s] с типом \"%s\"", i, j, cell.getCellType()));
                 }
             }
+        }
+    }
+
+    private void checkStickerFolder() {
+        if (!Files.exists(new File(stickerDir).toPath())) {
+            if (!new File(stickerDir).mkdirs()) {
+                throw new RuntimeIOException("Failed to create dirs");
+            }
+        }
+
+        try (Stream<Path> paths = Files.list(Path.of(stickerDir))) {
+            paths.filter(path -> {
+                        TemporalAccessor fileDateTime = DateTimeFormatter.ofPattern(stickerFileDateTimeFormat).parse(path.getFileName().toString().split("\\+")[1].substring(0, stickerFileDateTimeFormat.length()));
+                        return LocalDateTime.from(fileDateTime).plusHours(1).isBefore(LocalDateTime.now());
+                    })
+                    .forEach(path -> {
+                        if (!path.toFile().delete()) {
+                            throw new RuntimeIOException(String.format("Failed to delete file \"%s\".", path));
+                        }
+                    });
+        } catch (IOException e) {
+            log.error(String.format("%s: %s: %s", e.getClass().getName(), getClass().getName(), e.getMessage()));
+            for (StackTraceElement stackTraceElement : e.getStackTrace()) {
+                log.error("\t" + stackTraceElement.toString());
+            }
+            throw new RuntimeException(e);
         }
     }
 }
