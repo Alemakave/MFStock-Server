@@ -26,6 +26,7 @@
     text-anchor: middle;
     height: 50%;
     margin: 4px 0;
+    padding-right: 20px;
 }
 
 .input {
@@ -100,7 +101,7 @@
     padding: 10px;
     border-radius: 10px;
     margin: 5px 0;
-    width: 350px;
+    min-width: 350px;
     height: 100%;
 }
 
@@ -169,10 +170,16 @@ body {
     line-height: 30px;
     background: white;
     color: black;
+    cursor: pointer;
 }
 
 .dropdown-content-db-functions a:hover {
     color: white;
+}
+
+#close-image {
+    width: 100%;
+    filter: invert(1);
 }
 
 @keyframes rotate {

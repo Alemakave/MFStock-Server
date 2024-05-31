@@ -3,6 +3,7 @@ package ru.alemakave.mfstock.configs;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.Resource;
@@ -20,19 +21,20 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 @Component
 @Scope(scopeName = SCOPE_SINGLETON)
 public class MFStockConfigLoader {
-    public static final String PROPERTIES_FILE_PATH = "./MFStockServer.json";
+    private final String propertiesFilePath;
     private final Map<String, Object> configs = new HashMap<>();
     private final MFStockConfig mfStockConfig;
 
-    public MFStockConfigLoader(ConfigurableApplicationContext configurableApplicationContext, MFStockConfig mfStockConfig) {
+    public MFStockConfigLoader(ConfigurableApplicationContext configurableApplicationContext, MFStockConfig mfStockConfig, @Value("${mfstock.config.path:./MFStockServer.json}") String propertiesFilePath) {
         this.mfStockConfig = mfStockConfig;
+        this.propertiesFilePath = propertiesFilePath;
         putConfig(mfStockConfig);
         checkFileAndCreateIfNotFound();
         load(configurableApplicationContext);
     }
 
     private void checkFileAndCreateIfNotFound() {
-        File propertiesFile = new File(PROPERTIES_FILE_PATH);
+        File propertiesFile = new File(propertiesFilePath);
         if (!propertiesFile.exists()) {
             ((MFStockConfig)configs.get(mfStockConfig.getClass().getName())).setDBConfigs(new DBConfigs());
             try {
@@ -49,7 +51,7 @@ public class MFStockConfigLoader {
 
                 objectMapper
                         .writerWithDefaultPrettyPrinter()
-                        .writeValue(new File(PROPERTIES_FILE_PATH), resultNode);
+                        .writeValue(new File(propertiesFilePath), resultNode);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -57,7 +59,7 @@ public class MFStockConfigLoader {
     }
 
     private void load(ConfigurableApplicationContext configurableApplicationContext) {
-        Resource resource = configurableApplicationContext.getResource("file:" + PROPERTIES_FILE_PATH);
+        Resource resource = configurableApplicationContext.getResource("file:" + propertiesFilePath);
         try {
             MFStockConfig mfStockConfig = new ObjectMapper()
                     .disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES)

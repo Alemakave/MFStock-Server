@@ -1,6 +1,9 @@
 package ru.alemakave.slib;
 
 public class PrintConfigurationBuilder {
+    /**
+     * Documentation [<a href="https://learn.microsoft.com/ru-ru/office/vba/api/excel.sheets.printout">RU</a>]
+     */
     public static ExcelPrintConfiguration buildExcelConfiguration(String printerName) {
         return new ExcelPrintConfiguration(printerName);
     }
@@ -27,6 +30,9 @@ public class PrintConfigurationBuilder {
         }
     }
 
+    /**
+     * Documentation [<a href="https://learn.microsoft.com/ru-ru/office/vba/api/excel.sheets.printout">RU</a>]
+     */
     public static class ExcelPrintConfiguration extends PrintConfiguration {
         private int from = 1;
         private int to = 1;

@@ -1,25 +1,28 @@
 package ru.alemakave.mfstock.generators;
 
+import com.google.zxing.WriterException;
 import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.springframework.core.io.Resource;
+import ru.alemakave.mfstock.model.json.sticker.Sticker;
 
 import java.io.*;
+import java.util.List;
 import java.util.Map;
 
 public abstract class StickerGenerator {
     public static final String TEMPLATE_NOM_STICKER = "templates/r_NomStickerMGF.XLT";
     public static final String TEMPLATE_NOM_SER_STICKER = "templates/r_NomSerStickerMGF.XLT";
-    public static final String TEMPLATE_NOM_PARTY_STICKER = "templates/r_NomPartyStickerMGF.XLT";
     public static final String TEMPLATE_CELL_STICKER = "templates/r_CellSticker.XLT";
     public static final String TEMPLATE_EMPLOYEE_STICKER = "templates/r_EmployeeSticker.XLT";
     public static final String TEMPLATE_ORDER_NUMBER_STICKER = "templates/r_OrderNumber.XLT";
 
-    private final InputStream stickerTemplateInputStream;
+    private final Resource stickerTemplateResource;
 
-    public StickerGenerator(InputStream stickerTemplateInputStream) {
-        this.stickerTemplateInputStream = stickerTemplateInputStream;
+    public StickerGenerator(Resource stickerTemplateResource) {
+        this.stickerTemplateResource = stickerTemplateResource;
     }
 
     /**
@@ -29,6 +32,7 @@ public abstract class StickerGenerator {
      * @param dataMap - data map, then key - Cell address (used CellAddress or CellRangeAddress), value - cell data
      */
     public void generate(File outputFile, Map<Object, Object> dataMap) throws IOException {
+        InputStream stickerTemplateInputStream = stickerTemplateResource.getInputStream();
         Workbook wb = WorkbookFactory.create(stickerTemplateInputStream);
         Sheet sheet = wb.getSheetAt(0);
         for (Object key : dataMap.keySet()) {
@@ -67,4 +71,6 @@ public abstract class StickerGenerator {
         wb.close();
         workbookOutputStream.close();
     }
+
+    public abstract List<File> generate(File outputFile, Sticker sticker) throws IOException, WriterException;
 }
