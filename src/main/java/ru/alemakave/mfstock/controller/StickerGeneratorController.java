@@ -6,17 +6,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.view.RedirectView;
 import ru.alemakave.mfstock.service.IStickerService;
 
 import java.io.*;
 
+import static ru.alemakave.mfstock.model.StickerType.*;
+
 @RestController
-public class StickerController {
+public class StickerGeneratorController {
     private final IStickerService generatorService;
     private final Logger logger = LogManager.getLogger(getClass());
 
-    public StickerController(IStickerService generatorService) {
+    public StickerGeneratorController(IStickerService generatorService) {
         this.generatorService = generatorService;
     }
 
@@ -65,15 +66,6 @@ public class StickerController {
         }
     }
 
-    @GetMapping(path = "/mfstock-generate-nom-party-sticker")
-    public String getNomPartyStickerGenerator() {
-        try {
-            return generatorService.getNomPartyStickerGenerator();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @GetMapping(path = "/mfstock-generate-order-number-sticker")
     public String getOrderNumberStickerGenerator() {
         try {
@@ -83,49 +75,38 @@ public class StickerController {
         }
     }
 
+    @GetMapping(path = "/mfstock-get-available-printers")
+    public ResponseEntity<String> getAvailablePrinters() {
+        try {
+            return generatorService.getAvailablePrinters();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @PostMapping(path = "/mfstock-generate-nom-ser-sticker", consumes = "application/json")
-    public String postNomSerStickerGenerator(@RequestBody String requestBody) {
-        return generatorService.postNomSerStickerGenerator(requestBody);
+    public void postNomSerStickerGenerator(@RequestBody String requestBody) {
+        generatorService.postPrintSticker(requestBody, NOM_SERIAL);
     }
 
     @PostMapping(path = "/mfstock-generate-nom-sticker", consumes = "application/json")
-    public String postNomStickerGenerator(@RequestBody String requestBody) {
-        return generatorService.postNomStickerGenerator(requestBody);
+    public void postNomStickerGenerator(@RequestBody String requestBody) {
+        generatorService.postPrintSticker(requestBody, NOM);
     }
 
     @PostMapping(path = "/mfstock-generate-cell-sticker", consumes = "application/json")
-    public String postCellStickerGenerator(@RequestBody String requestBody) {
-        return generatorService.postCellStickerGenerator(requestBody);
+    public void postCellStickerGenerator(@RequestBody String requestBody) {
+        generatorService.postPrintSticker(requestBody, CELL);
     }
 
     @PostMapping(path = "/mfstock-generate-employee-sticker", consumes = "application/json")
-    public String postEmployeeStickerGenerator(@RequestBody String requestBody) {
-        return generatorService.postEmployeeStickerGenerator(requestBody);
-    }
-
-    @PostMapping(path = "/mfstock-generate-nom-party-sticker", consumes = "application/json")
-    public String postNomPartyStickerGenerator(@RequestBody String requestBody) {
-        return generatorService.postNomPartyStickerGenerator(requestBody);
+    public void postEmployeeStickerGenerator(@RequestBody String requestBody) {
+        generatorService.postPrintSticker(requestBody, EMPLOYEE);
     }
 
     @PostMapping(path = "/mfstock-generate-order-number-sticker", consumes = "application/json")
-    public String postOrderNumberStickerGenerator(@RequestBody String requestBody) {
-        return generatorService.postOrderNumberStickerGenerator(requestBody);
-    }
-
-    @PostMapping(path = "/mfstock-generate-nom-party-sticker")
-    public RedirectView postNomPartyStickerUploadFile(@RequestParam("data-file") MultipartFile file) {
-        try {
-            BufferedInputStream bis = new BufferedInputStream(file.getResource().getInputStream());
-            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream("Tmp.xlsx"));
-            bis.transferTo(bos);
-            bos.close();
-            bis.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return new RedirectView("/mfstock-generate-nom-party-sticker");
+    public void postOrderNumberStickerGenerator(@RequestBody String requestBody) {
+        generatorService.postPrintSticker(requestBody, ORDER_NUMBER);
     }
 
     @PostMapping(path = "/mfstock-generate-cell-sticker")
@@ -141,6 +122,11 @@ public class StickerController {
     @PostMapping(path = "/mfstock-generate-nom-ser-sticker")
     public ResponseEntity<String> postNomSerStickerUploadFile(@RequestParam("data-file") MultipartFile file) {
         return generatorService.uploadStickersDataTable(file, getNomSerStickerGenerator());
+    }
+
+    @GetMapping(path = "/mfstock-get-sticker-file")
+    public ResponseEntity<byte[]> getStickerFile(@RequestParam("id") String uuidStr) {
+        return generatorService.getStickerFile(uuidStr);
     }
 
     @ExceptionHandler({RuntimeException.class})

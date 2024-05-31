@@ -12,10 +12,10 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 
 @RestController
-public class BaseController {
+public class HtmlUtilsController {
     private final ConfigurableApplicationContext context;
 
-    public BaseController(ConfigurableApplicationContext context) {
+    public HtmlUtilsController(ConfigurableApplicationContext context) {
         this.context = context;
     }
 

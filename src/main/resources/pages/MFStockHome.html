@@ -8,8 +8,9 @@
     <script type="text/javascript" src="/get-script?name=db-functions.js"></script>
     <script>
     		$(function(){
-      			$("#header").load("/get-html-part?name=header-part.html");
-				injectDatabaseFunctions();
+      			$("#header").load("/get-html-part?name=header-part.html", function() {
+				  injectDatabaseFunctions();
+      			});
     		});
     </script>
   </head>
