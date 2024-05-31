@@ -9,6 +9,8 @@ import ru.alemakave.slib.PrintConfigurationBuilder;
 
 import java.io.*;
 
+import static ru.alemakave.slib.excel.constants.XlFileFormat.xlHtml;
+
 @Slf4j
 public class ComUtils {
     public static void printExcelFile(File file, PrintConfigurationBuilder.ExcelPrintConfiguration printConfigurationBuilder) {
@@ -48,5 +50,21 @@ public class ComUtils {
             xl.invoke("Quit", new Variant[] {});
             ComThread.Release();
         }
+    }
+
+    /**
+     * <a href="https://learn.microsoft.com/en-us/office/vba/api/excel.workbook.saveas">Documentation</a> [<a href="https://learn.microsoft.com/en-us/office/vba/api/excel.workbook.saveas">RU</a>]
+     * @param excelFile input file
+     * @param outputFile output file
+     */
+    public static void saveExcelFileToHtml(File excelFile, File outputFile) {
+        ComThread.InitSTA();
+        ActiveXComponent xl = new ActiveXComponent("Excel.Application");
+        Dispatch workbooks = xl.getProperty("Workbooks").toDispatch();
+        Dispatch workbook = Dispatch.call(workbooks, "Open", excelFile.getAbsolutePath()).toDispatch();
+        Dispatch.put(xl, "Visible", new Variant(false));
+        Dispatch.call(workbook, "SaveAs", outputFile.getAbsolutePath(), xlHtml);
+        Variant f = new Variant(false);
+        Dispatch.call(workbook, "Close", f);
     }
 }
