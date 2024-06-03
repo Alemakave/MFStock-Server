@@ -1,3 +1,4 @@
+import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 
 plugins {
@@ -59,6 +60,60 @@ tasks.register('generateBuildInfoClass') {
         outputDir.exists() || outputDir.mkdirs()
 
         new File(outputDir, "BuildInfo.java").write("package ru.alemakave.mfstock;\n\npublic class BuildInfo {\n" + "    public static final String BUILD_VERSION = \"" + version + "\";\n}")
+    }
+}
+
+tasks.register("scanAndShowDeprecated") {
+    sourceSets.main.java.files.forEach {
+        file -> {
+            try (FileInputStream fis = new FileInputStream(file)) {
+                int lineNumber = 1
+                boolean foundedDeprecatedLine = false
+                Map<Integer, String> foundedDeprecated = new TreeMap<>()
+
+                List<String> fileData = new String(fis.readAllBytes()).split("\n")
+                boolean findMethodOrField = false
+                fileData.forEach{ line ->
+                    line = line.strip()
+                    if (line.startsWith("@Deprecated")) {
+                        foundedDeprecated.put(lineNumber, line)
+                        findMethodOrField = true
+                        if (!foundedDeprecatedLine) {
+                            foundedDeprecated.put(-1, file.toString())
+                        }
+                        foundedDeprecatedLine = true
+                    }
+
+                    if (findMethodOrField) {
+                        if (line.startsWith("public") || line.startsWith("private") || line.startsWith("protected")) {
+                            foundedDeprecated.put(lineNumber, line)
+                            findMethodOrField = false
+                        }
+                    }
+
+                    lineNumber++
+                }
+
+                if (foundedDeprecatedLine) {
+                    boolean printedInPrevIterationFileName = false
+                    foundedDeprecated.keySet().forEach {
+                        key -> {
+                            if (key == -1) {
+                                println()
+                                print(new String(foundedDeprecated.get(key).toString().getBytes(StandardCharsets.UTF_8)))
+                                printedInPrevIterationFileName = true
+                            } else {
+                                if (printedInPrevIterationFileName) {
+                                    println(":" + key)
+                                    printedInPrevIterationFileName = false
+                                }
+                                println(key + ": " + new String(foundedDeprecated.get(key).toString().getBytes(StandardCharsets.UTF_8)))
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
