@@ -2,7 +2,9 @@ package ru.alemakave.mfstock.model.table;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -18,16 +20,16 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static ru.alemakave.slib.utils.ResourceLoader.getLocalFileInputStream;
 
+@Slf4j
 public class Table implements ToHtmlFunction {
     private DateTimeJson databaseDate = null;
     private List<TableRow> rows;
@@ -35,6 +37,7 @@ public class Table implements ToHtmlFunction {
     @JsonCreator
     public Table(@JsonProperty("rows") List<TableRow> rows) {
         this.rows = rows;
+        databaseDate = new DateTimeJson(Date.from(LocalDateTime.now().toInstant(ZoneOffset.UTC)), new SimpleDateFormat("dd.MM.yyyy HH:mm"));
     }
 
     public Table(File file) throws IOException {
@@ -67,7 +70,6 @@ public class Table implements ToHtmlFunction {
     public void saveColumnsAccordingHeaders(List<DBConfigsColumns> columnsConfig) {
         int[] headersIndex = new int[columnsConfig.size()];
         for (int i = 0; i < columnsConfig.size(); i++) {
-//            headersIndex[i] = rows.get(0).getCells().indexOf(new TableCell(columnsConfig.get(i).getHeaderText()));
             final TableCell exceptedTableCell = new TableCell(columnsConfig.get(i).getHeaderText());
             headersIndex[i] = ListUtils.indexOf(rows.get(0).getCells(), object ->
                     object.toString().equalsIgnoreCase(exceptedTableCell.toString())
@@ -107,11 +109,15 @@ public class Table implements ToHtmlFunction {
             if (configsColumn.getPrefix() == null)
                 continue;
             List<TableCell> cells = rows.get(0).getCells();
-            int columnIndex = cells.indexOf(new TableCell(configsColumn.getHeaderText()));
-            for (int i = 1; i < rows.size(); i++) {
-                TableCell cell = rows.get(i).getCells().get(columnIndex);
-                cell.setValue(configsColumn.getPrefix() + cell.getValue());
-                rows.get(i).getCells().set(columnIndex, cell);
+            int columnIndex = cells.indexOf(new TableCell(configsColumn.getHeaderText(), CellType.STRING));
+            if (columnIndex > 0) {
+                for (int i = 1; i < rows.size(); i++) {
+                    TableCell cell = rows.get(i).getCells().get(columnIndex);
+                    cell.setValue(configsColumn.getPrefix() + cell.getValue());
+                    rows.get(i).getCells().set(columnIndex, cell);
+                }
+            } else {
+                log.warn(String.format("Not found column \"%s\"", configsColumn.getHeaderText()));
             }
         }
     }
@@ -134,8 +140,48 @@ public class Table implements ToHtmlFunction {
         return rows;
     }
 
+    public TableRow getRow(int index) {
+        return rows.get(index);
+    }
+
     public void setRows(List<TableRow> rows) {
         this.rows = rows;
+    }
+
+    public TableRow getHeader() {
+        return rows.get(0);
+    }
+
+    public void addRows(TableRow... rows) {
+        addRows(List.of(rows));
+    }
+
+    public void addRows(List<TableRow> rows) {
+        this.rows.addAll(rows);
+    }
+
+    public void encourage(Table tableToAdd) {
+        List<Integer> toColumn = new ArrayList<>();
+        List<Integer> fromColumn = new ArrayList<>();
+        for (int i = 0; i < getHeader().getCells().size(); i++) {
+            TableCell currentTableHeaderCell = getHeader().getCells().get(i);
+            for (int j = 0; j < tableToAdd.getHeader().getCells().size(); j++) {
+                TableCell tableToAddHeaderCell = tableToAdd.getHeader().getCells().get(j);
+                if (currentTableHeaderCell.equals(tableToAddHeaderCell)) {
+                    toColumn.add(i);
+                    fromColumn.add(j);
+                    break;
+                }
+            }
+        }
+
+        for (int i = 1; i < tableToAdd.getRowsCount(); i++) {
+            TableRow row = new TableRow();
+            for (int j = 0; j < fromColumn.size(); j++) {
+                row.setCell(toColumn.get(j), tableToAdd.getRow(i).getCell(fromColumn.get(j)));
+            }
+            addRows(row);
+        }
     }
 
     public DateTimeJson getDatabaseDate() {
