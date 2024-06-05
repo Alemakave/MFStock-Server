@@ -180,6 +180,9 @@ public class Table implements ToHtmlFunction {
             for (int j = 0; j < fromColumn.size(); j++) {
                 row.setCell(toColumn.get(j), tableToAdd.getRow(i).getCell(fromColumn.get(j)));
             }
+            while (row.getCells().size() < getRow(0).getCells().size()) {
+                row.addCell(TableCell.EMPTY);
+            }
             addRows(row);
         }
     }
