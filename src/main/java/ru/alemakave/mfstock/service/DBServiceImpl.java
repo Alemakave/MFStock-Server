@@ -3,6 +3,8 @@ package ru.alemakave.mfstock.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.ss.usermodel.CellType;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +29,7 @@ import java.util.List;
 public class DBServiceImpl implements IDBService {
     private static final String CLOSE_DB_PAGE_RESOURCE_PATH = "classpath:/pages/MFStockCloseDBStatus.html";
     private static final String LOAD_DB_PAGE_RESOURCE_PATH = "classpath:/pages/MFStockLoadDBStatus.html";
+    private static final String FIND_PAGE_RESOURCE_PATH = "classpath:/pages/MFStockFindPage.html";
 
     private final Logger logger = LoggerFactory.getLogger(DBServiceImpl.class);
 
@@ -126,5 +129,31 @@ public class DBServiceImpl implements IDBService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String find(String searchString) {
+        Document jsoupDocument = Jsoup.parse(PageUtils.getPage(configurableApplicationContext.getResource(FIND_PAGE_RESOURCE_PATH)));
+
+        List<TableRow> rows = new ArrayList<>();
+        if (searchString != null && !searchString.isEmpty()) {
+            searchString = searchString.strip();
+            logger.info("Search string: " + searchString);
+            rows.add(getDB().getRows().get(0));
+
+            String[] searchSubString = searchString.split("#");
+            List<TableRow> findedRows = TableUtils.findRowContains(getDB().getRows(), searchSubString[0]);
+            for (int i = 1; i < searchSubString.length; i++) {
+                findedRows = TableUtils.findRowContains(findedRows, searchSubString[i]);
+            }
+
+            rows.addAll(findedRows);
+        }
+
+        if (searchString != null && !searchString.isEmpty()) {
+            jsoupDocument.body().child(1).append(new Table(rows).applyAsHtml());
+        }
+
+        return jsoupDocument.toString();
     }
 }

@@ -1,7 +1,8 @@
 function injectDatabaseFunctions() {
     var dbReloadButton = document.getElementsByClassName("header-element db-function-reload")[0];
-
-    dbReloadButton.attributes.removeNamedItem("href");
+    if (dbReloadButton.attributes.hasOwnProperty("href")) {
+        dbReloadButton.attributes.removeNamedItem("href");
+    }
     dbReloadButton.onclick = async function() {
         var filler = document.createElement("div");
         filler.classList.add("filler");

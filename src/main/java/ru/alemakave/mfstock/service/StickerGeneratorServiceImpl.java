@@ -172,11 +172,12 @@ public class StickerGeneratorServiceImpl implements IStickerService {
                     "    background: #aaa;\n" +
                     "    margin: 5px;\n" +
                     "    margin-left: 20px;\n" +
+                    "    margin-right: 0px;\n" +
                     "    text-align: center;\n" +
-                    "    margin-right: 25px;\n" +
                     "    font-size: 25px;\n" +
                     "\">%s</div>", file.getOriginalFilename()));
             jsoupDocument.getElementById("upload").append(table.applyAsHtml());
+            jsoupDocument.getElementById("upload-table").attr("style", "margin-left: 20px;");
 
             if (table.getRows().get(0).getCells().size() != inputs.size()) {
                 throw new Exception("Неверно заполнена таблица. Просьба проверить и перезагрузить таблицу. Найдены следующие колонки " + Arrays.toString(table.getRows().get(0).getCells().toArray()) + " ожидалось " +

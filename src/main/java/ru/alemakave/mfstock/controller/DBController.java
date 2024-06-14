@@ -26,4 +26,9 @@ public class DBController {
     public String reloadDB() {
         return dbService.reloadDB();
     }
+
+    @GetMapping(path = {"/mfstock-find"})
+    public String find(String searchString) {
+        return dbService.find(searchString);
+    }
 }
