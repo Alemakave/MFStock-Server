@@ -28,7 +28,7 @@ public class HtmlUtilsController {
     @GetMapping("/get-style")
     public String getStyle(@RequestParam("name") String name) {
         try {
-            return getCss(new RequestEntity<>(HttpMethod.GET, new URI("/js/" + name)));
+            return getCss(new RequestEntity<>(HttpMethod.GET, new URI("/css/" + name)));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -58,7 +58,7 @@ public class HtmlUtilsController {
     @GetMapping("/get-html-part")
     public String getHtmlPart(@RequestParam("name") String name) {
         try {
-            return getHtmlPart(new RequestEntity<>(HttpMethod.GET, new URI("/js/" + name)));
+            return getHtmlPart(new RequestEntity<>(HttpMethod.GET, new URI("/html-part/" + name)));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
