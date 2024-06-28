@@ -35,7 +35,7 @@ function injectDatabaseFunctions() {
 
         var loadingElement = document.createElement("div");
         loadingElement.classList.add("reloadingImage");
-        loadingElement.style.cssText = "background-image: url(\"/get-image?name=loading.svg\");width: 100px;height: 100px;background-repeat: no-repeat;background-size: contain;transition: all 0.5s ease-in 0s;animation-name: rotate;animation-duration: 2s;animation-iteration-count: infinite;animation-timing-function: linear;margin: 1vw auto;";
+        loadingElement.style.cssText = "background-image: url(\"/img/loading.svg\");width: 100px;height: 100px;background-repeat: no-repeat;background-size: contain;transition: all 0.5s ease-in 0s;animation-name: rotate;animation-duration: 2s;animation-iteration-count: infinite;animation-timing-function: linear;margin: 1vw auto;";
         continueInfo.appendChild(loadingElement);
 
         document.body.appendChild(filler);
@@ -45,7 +45,7 @@ function injectDatabaseFunctions() {
 
         continueInfoText.textContent = "БД перезагружена";
         loadingElement.style.animationName = "";
-        loadingElement.style.backgroundImage = "url(\"/get-image?name=loading-complete.svg\")";
+        loadingElement.style.backgroundImage = "url(\"/img/loading-complete.svg\")";
 
         timer(
             null,

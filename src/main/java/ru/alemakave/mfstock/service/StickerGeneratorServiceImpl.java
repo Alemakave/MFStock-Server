@@ -146,7 +146,7 @@ public class StickerGeneratorServiceImpl implements IStickerService {
             BufferedInputStream bis = new BufferedInputStream(file.getResource().getInputStream());
 
             Document jsoupDocument = Jsoup.parse(currentHtmlCode);
-            jsoupDocument.head().append("<script type=\"text/javascript\" src=\"/get-script?name=TableColumnFormater.js\"></script>");
+            jsoupDocument.head().append("<script type=\"text/javascript\" src=\"/js/TableColumnFormater.js\"></script>");
             Table table = new Table(bis);
 
             validateTable(table);
@@ -187,7 +187,7 @@ public class StickerGeneratorServiceImpl implements IStickerService {
             for (Element tableRow : jsoupDocument.getElementsByClass("table-header")) {
                 tableRow.child(0).before("<div class=\"table-header-cell\"><input type=\"checkbox\" class=\"selectAllInColumn\"/></div>");
                 tableRow.child(tableRow.childrenSize() - 1).after("<div class=\"table-header-cell\">Кол-во на печать</div>");
-                tableRow.child(tableRow.childrenSize() - 1).after("<div id=\"table-close-button\" onclick=\"closeTable()\"><img src=\"/get-image?name=close.svg\" id=\"close-image\"\"></div>");
+                tableRow.child(tableRow.childrenSize() - 1).after("<div id=\"table-close-button\" onclick=\"closeTable()\"><img src=\"/img/close.svg\" id=\"close-image\"\"></div>");
             }
 
             for (Element tableRow : jsoupDocument.getElementsByClass("table-row")) {
@@ -211,7 +211,7 @@ public class StickerGeneratorServiceImpl implements IStickerService {
             jsoupDocument.getElementById("print-button").text("Напечатать выбранное");
             jsoupDocument.getElementById("print-button").attr("onclick", "printSelectedNomenclatures();");
             jsoupDocument.body().append("<script type=\"text/javascript\">markInputBoxWithColumnIds();</script>");
-            jsoupDocument.body().append("<script type=\"text/javascript\" src=\"/get-script?name=CheckRowsEvent.js\"></script>");
+            jsoupDocument.body().append("<script type=\"text/javascript\" src=\"/js/CheckRowsEvent.js\"></script>");
 
             HttpHeaders headers = new HttpHeaders();
             headers.add("Connection", "close");
