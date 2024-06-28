@@ -2,8 +2,8 @@
 	min-width: 100px;
 	min-height: 100px;
 	display: table;
-	margin: 5px;
-    margin-left: 20px;
+    margin: 5px 0;
+    width: 100%;
 }
 
 .table-header {

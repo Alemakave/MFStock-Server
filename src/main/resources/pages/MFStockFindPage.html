@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>MFStock find</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/css/generator.css">
+        <link rel="stylesheet" href="/css/find-page.css">
+        <link rel="stylesheet" href="/css/table.css">
+        <script type="text/javascript" src="/js/jquery.js"></script>
+        <script type="text/javascript" src="/js/db-functions.js"></script>
+        <script>
+            $(function() {
+                $("#header").load("/html-part/header-part.html", function() {
+                    let headerElement = $(".header-element.db-function-find").get(0);
+                    headerElement.classList.add("selected");
+                    if (headerElement.attributes.hasOwnProperty("href")) {
+                        headerElement.attributes.removeNamedItem("href");
+                    }
+                    injectDatabaseFunctions();
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <div id="header">
+        </div>
+        <div class="content">
+            <div class="topnav">
+                <div class="search-container">
+                    <input type="text" placeholder="Поиск.." name="search">
+                    <button type="submit"><i class="fa fa-search" style="height: 17px;width: 17px;"></i></button>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            var searchInputElement = document.getElementsByClassName("search-container")[0].getElementsByTagName("input")['search'];
+            var searchButtonElement = document.getElementsByClassName("search-container")[0].getElementsByTagName("button")[0];
+            if (document.location.search.length != 0) {
+                searchInputElement.value = decodeURI(document.location.search.substring(1)).split("=")[1].replaceAll("%23", "#");
+            }
+            searchButtonElement.onclick = function() {
+                document.location.href = document.location.origin + document.location.pathname + "?searchString=" + searchInputElement.value.replaceAll("#", "%23");
+            }
+            searchInputElement.onkeypress = function(event) {
+                if (event.key == "Enter") {
+                    searchButtonElement.click();
+                }
+            }
+        </script>
+    </body>
+</html>
