@@ -68,11 +68,12 @@ public class HtmlUtilsController {
 
         String name = requestEntity.getUrl().getPath().substring("/html-part".length());
         try {
-            BufferedInputStream bui = new BufferedInputStream(context.getResource("classpath:/pages/html-parts/" + name).getInputStream());
+            BufferedInputStream bui = new BufferedInputStream(context.getResource("classpath:/pages/html-parts" + name).getInputStream());
             String style = new String(bui.readAllBytes());
             bui.close();
             return ResponseEntity.ok(style);
         } catch (FileNotFoundException e) {
+            log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -85,11 +86,12 @@ public class HtmlUtilsController {
 
         String name = requestEntity.getUrl().getPath().substring("/css".length());
         try {
-            BufferedInputStream bui = new BufferedInputStream(context.getResource("classpath:/pages/css/" + name).getInputStream());
+            BufferedInputStream bui = new BufferedInputStream(context.getResource("classpath:/pages/css" + name).getInputStream());
             String style = new String(bui.readAllBytes());
             bui.close();
             return ResponseEntity.ok(style);
         } catch (FileNotFoundException e) {
+            log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }  catch (IOException e) {
             throw new RuntimeException(e);
@@ -120,13 +122,14 @@ public class HtmlUtilsController {
                     break;
             }
 
-            BufferedInputStream bis = new BufferedInputStream(context.getResource("classpath:/pages/img/" + name).getInputStream());
+            BufferedInputStream bis = new BufferedInputStream(context.getResource("classpath:/pages/img" + name).getInputStream());
             byte[] imageBytes = bis.readAllBytes();
             bis.close();
             return ResponseEntity.ok()
                     .contentType(mediaType)
                     .body(imageBytes);
         } catch (FileNotFoundException e) {
+            log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -139,11 +142,12 @@ public class HtmlUtilsController {
 
         String name = requestEntity.getUrl().getPath().substring("/js".length());
         try {
-            BufferedInputStream bui = new BufferedInputStream(context.getResource("classpath:/pages/js/" + name).getInputStream());
+            BufferedInputStream bui = new BufferedInputStream(context.getResource("classpath:/pages/js" + name).getInputStream());
             String style = new String(bui.readAllBytes());
             bui.close();
             return ResponseEntity.ok(style);
         } catch (FileNotFoundException e) {
+            log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (IOException e) {
             throw new RuntimeException(e);
