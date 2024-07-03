@@ -3,15 +3,13 @@ package ru.alemakave.mfstock.controller;
 import com.google.common.io.Files;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.BufferedInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 
@@ -28,7 +26,7 @@ public class HtmlUtilsController {
     @GetMapping("/get-style")
     public String getStyle(@RequestParam("name") String name) {
         try {
-            return getCss(new RequestEntity<>(HttpMethod.GET, new URI("/css/" + name)));
+            return getCss(new RequestEntity<>(HttpMethod.GET, new URI("/css/" + name))).getBody();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -38,7 +36,7 @@ public class HtmlUtilsController {
     @GetMapping("/get-script")
     public String getScript(@RequestParam("name") String name) {
         try {
-            return getJavascript(new RequestEntity<>(HttpMethod.GET, new URI("/js/" + name)));
+            return getJavascript(new RequestEntity<>(HttpMethod.GET, new URI("/js/" + name))).getBody();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -58,14 +56,14 @@ public class HtmlUtilsController {
     @GetMapping("/get-html-part")
     public String getHtmlPart(@RequestParam("name") String name) {
         try {
-            return getHtmlPart(new RequestEntity<>(HttpMethod.GET, new URI("/html-part/" + name)));
+            return getHtmlPart(new RequestEntity<>(HttpMethod.GET, new URI("/html-part/" + name))).getBody();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     @GetMapping("/html-part/**")
-    public String getHtmlPart(RequestEntity<?> requestEntity) {
+    public ResponseEntity<String> getHtmlPart(RequestEntity<?> requestEntity) {
         log.info("Get html part: " + requestEntity.getUrl().getPath().substring("/html-part".length()));
 
         String name = requestEntity.getUrl().getPath().substring("/html-part".length());
@@ -73,14 +71,16 @@ public class HtmlUtilsController {
             BufferedInputStream bui = new BufferedInputStream(context.getResource("classpath:/pages/html-parts/" + name).getInputStream());
             String style = new String(bui.readAllBytes());
             bui.close();
-            return style;
+            return ResponseEntity.ok(style);
+        } catch (FileNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     @GetMapping("/css/**")
-    public String getCss(RequestEntity<?> requestEntity) {
+    public ResponseEntity<String> getCss(RequestEntity<?> requestEntity) {
         log.info("Get CSS: " + requestEntity.getUrl().getPath().substring("/css".length()));
 
         String name = requestEntity.getUrl().getPath().substring("/css".length());
@@ -88,8 +88,10 @@ public class HtmlUtilsController {
             BufferedInputStream bui = new BufferedInputStream(context.getResource("classpath:/pages/css/" + name).getInputStream());
             String style = new String(bui.readAllBytes());
             bui.close();
-            return style;
-        } catch (IOException e) {
+            return ResponseEntity.ok(style);
+        } catch (FileNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }  catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -124,13 +126,15 @@ public class HtmlUtilsController {
             return ResponseEntity.ok()
                     .contentType(mediaType)
                     .body(imageBytes);
+        } catch (FileNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     @GetMapping("/js/**")
-    public String getJavascript(RequestEntity<?> requestEntity) {
+    public ResponseEntity<String> getJavascript(RequestEntity<?> requestEntity) {
         log.info("Get javascript: " + requestEntity.getUrl().getPath().substring("/js".length()));
 
         String name = requestEntity.getUrl().getPath().substring("/js".length());
@@ -138,7 +142,9 @@ public class HtmlUtilsController {
             BufferedInputStream bui = new BufferedInputStream(context.getResource("classpath:/pages/js/" + name).getInputStream());
             String style = new String(bui.readAllBytes());
             bui.close();
-            return style;
+            return ResponseEntity.ok(style);
+        } catch (FileNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

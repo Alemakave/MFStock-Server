@@ -152,6 +152,7 @@ public class DBServiceImpl implements IDBService {
 
         if (searchString != null && !searchString.isEmpty()) {
             jsoupDocument.body().child(1).append(new Table(rows).applyAsHtml());
+            jsoupDocument.body().append("<script type=\"text/javascript\" src=\"/js/qr-generator-button.js\"></script>");
         }
 
         return jsoupDocument.toString();
