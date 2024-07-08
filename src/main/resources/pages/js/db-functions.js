@@ -47,11 +47,15 @@ function injectDatabaseFunctions() {
         loadingElement.style.animationName = "";
         loadingElement.style.backgroundImage = "url(\"/img/loading-complete.svg\")";
 
-        timer(
+        var closeTimer = timer(
             null,
             5,
-            () => document.getElementsByClassName(filler.className)[0].remove()
+            () => filler.remove()
         )
+        filler.onclick = () => {
+            filler.remove();
+            clearInterval(timer);
+        };
     }
 }
 
