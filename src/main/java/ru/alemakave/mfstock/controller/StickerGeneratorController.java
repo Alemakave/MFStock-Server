@@ -1,5 +1,6 @@
 package ru.alemakave.mfstock.controller;
 
+import com.google.zxing.WriterException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -7,6 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.alemakave.mfstock.service.IStickerService;
+import ru.alemakave.qr.ImageType;
+import ru.alemakave.qr.generator.QRGenerator;
+import ru.alemakave.slib.utils.ImageUtils;
 
 import java.io.*;
 
@@ -127,6 +131,15 @@ public class StickerGeneratorController {
     @GetMapping(path = "/mfstock-get-sticker-file")
     public ResponseEntity<byte[]> getStickerFile(@RequestParam("id") String uuidStr) {
         return generatorService.getStickerFile(uuidStr);
+    }
+
+    @GetMapping("/mfstock-generate-qr-code")
+    public ResponseEntity<byte[]> getGenerateQRCode(@RequestParam("data") String data) {
+        try {
+            return ResponseEntity.ok(ImageUtils.toByteArray(QRGenerator.generateToBufferedImage(data), ImageType.PNG.name()));
+        } catch (IOException | WriterException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @ExceptionHandler({RuntimeException.class})

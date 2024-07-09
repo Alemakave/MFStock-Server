@@ -277,7 +277,7 @@ public class StickerGeneratorServiceImpl implements IStickerService {
     }
 
     @Override
-    public void postPrintSticker(String requestBody, StickerType stickerType) {
+    public ResponseEntity<Void> postPrintSticker(String requestBody, StickerType stickerType) {
         log.info(String.format("postPrintSticker(%s)", requestBody));
 
         ResponseEntity<List<String>> responseEntity = postGenerateStickerExcelFile(requestBody, stickerType);
@@ -292,14 +292,27 @@ public class StickerGeneratorServiceImpl implements IStickerService {
             }
 
             ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(printerName);
-            printConfiguration.setCopies(1);
+            if (printStickerJson.getSticker() instanceof NomSticker) {
+                try {
+                    printConfiguration.setCopies(Integer.parseInt(((NomSticker) printStickerJson.getSticker()).getCopies()));
+                } catch (NumberFormatException e) {
+                    printConfiguration.setCopies(1);
+
+                    log.error(String.format("%s: %s: %s", e.getClass().getName(), getClass().getName(), e.getMessage()));
+                    for (StackTraceElement stackTraceElement : e.getStackTrace()) {
+                        log.error("\t" + stackTraceElement.toString());
+                    }
+                }
+            } else {
+                printConfiguration.setCopies(1);
+            }
 
             for (String stickerFileUUID : Objects.requireNonNull(responseEntity.getBody())){
                 File stickerFile = new File(stickerDir, stickerFileUUID);
                 PrintUtils.printFile(stickerFile, printConfiguration);
             }
 
-            ResponseEntity.ok().build();
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             log.error(String.format("%s: %s: %s", e.getClass().getName(), getClass().getName(), e.getMessage()));
             for (StackTraceElement stackTraceElement : e.getStackTrace()) {
