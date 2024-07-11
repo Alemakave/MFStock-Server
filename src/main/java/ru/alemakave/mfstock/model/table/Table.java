@@ -37,7 +37,7 @@ public class Table implements ToHtmlFunction {
     @JsonCreator
     public Table(@JsonProperty("rows") List<TableRow> rows) {
         this.rows = rows;
-        databaseDate = new DateTimeJson(Date.from(LocalDateTime.now().toInstant(ZoneOffset.UTC)), new SimpleDateFormat("dd.MM.yyyy HH:mm"));
+        databaseDate = new DateTimeJson(Date.from(LocalDateTime.now(ZoneOffset.ofHours(0)).toInstant(ZoneOffset.ofHours(0))), new SimpleDateFormat("dd.MM.yyyy HH:mm"));
     }
 
     public Table(File file) throws IOException {
