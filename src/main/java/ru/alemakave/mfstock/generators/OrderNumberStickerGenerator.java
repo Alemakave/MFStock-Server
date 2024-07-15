@@ -1,7 +1,6 @@
 package ru.alemakave.mfstock.generators;
 
 import com.google.zxing.WriterException;
-import com.jacob.com.NotImplementedException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.util.CellAddress;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -22,7 +21,36 @@ public class OrderNumberStickerGenerator extends StickerGenerator {
         super(configurableApplicationContext.getResource("classpath:/" + TEMPLATE_ORDER_NUMBER_STICKER));
     }
 
-    private void generate(File outputFile, OrderNumberSticker sticker, int stickerNumber) throws IOException {
+    @Override
+    public List<File> generate(File outputFile, Sticker sticker) throws IOException, WriterException {
+        if (!(sticker instanceof OrderNumberSticker)) {
+            throw new IllegalArgumentException(String.format("Класс стикера (\"%s\") должен быть, либо наследоваться от класса \"OrderNumberSticker\"", sticker.getClass().getSimpleName()));
+        }
+
+        OrderNumberSticker orderNumberSticker = (OrderNumberSticker) sticker;
+
+        if (orderNumberSticker.orderCountCargoSpaces == 0) {
+            generateByNumber(outputFile, (OrderNumberSticker) sticker, 0);
+            return List.of(outputFile);
+        }
+
+        int stickerCount = orderNumberSticker.orderCountCargoSpaces;
+        ArrayList<File> stickerFiles = new ArrayList<>(stickerCount);
+
+        File stickerDir = outputFile.getParentFile();
+        String stickerFileName = FileUtils.getFileNameWithoutExtension(outputFile.getName());
+        String stickerFileExt = outputFile.getName().substring(stickerFileName.length()+1);
+
+        for (int i = 0; i < stickerCount; i++) {
+            File stickerFile = new File(stickerDir, stickerFileName + "_" + i + "." + stickerFileExt);
+            generateByNumber(stickerFile, orderNumberSticker, i + 1);
+            stickerFiles.add(stickerFile);
+        }
+
+        return stickerFiles;
+    }
+
+    private void generateByNumber(File outputFile, OrderNumberSticker sticker, int stickerNumber) throws IOException {
         String orderNumber = sticker.getOrderNumber();
         int orderCountCargoSpaces = sticker.getOrderCountCargoSpaces();
 
@@ -37,34 +65,5 @@ public class OrderNumberStickerGenerator extends StickerGenerator {
         }
 
         super.generate(outputFile, dataMap);
-    }
-
-    @Override
-    public List<File> generate(File outputFile, Sticker sticker) throws IOException, WriterException {
-        if (((OrderNumberSticker)sticker).orderCountCargoSpaces == 0) {
-            generate(outputFile, (OrderNumberSticker) sticker, 0);
-            return List.of(outputFile);
-        }
-
-        int stickerCount = ((OrderNumberSticker)sticker).orderCountCargoSpaces;
-        ArrayList<File> stickerFiles = new ArrayList<>(stickerCount);
-
-        File stickerDir = outputFile.getParentFile();
-        String stickerFileName = FileUtils.getFileNameWithoutExtension(outputFile.getName());
-        String stickerFileExt = outputFile.getName().substring(stickerFileName.length()+1);
-
-        for (int i = 0; i < stickerCount; i++) {
-            File stickerFile = new File(stickerDir, stickerFileName + "_" + i + "." + stickerFileExt);
-            generate(stickerFile, (OrderNumberSticker) sticker, i + 1);
-            stickerFiles.add(stickerFile);
-        }
-
-        NotImplementedException exception = new NotImplementedException("Method not yet implemented");
-        log.error(String.format("%s: %s: %s", exception.getClass().getName(), getClass().getName(), exception));
-        for (StackTraceElement stackTraceElement : exception.getStackTrace()) {
-            log.error("\t" + stackTraceElement.toString());
-        }
-
-        return stickerFiles;
     }
 }
