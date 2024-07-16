@@ -1,26 +1,32 @@
 package ru.alemakave.mfstock.model.json;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.ToString;
+import org.jetbrains.annotations.NotNull;
 
-import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-public class DateTimeJson {
+@Getter
+@ToString
+public class DateTimeJson implements Comparable<DateTimeJson> {
     @JsonProperty("dateTime")
-    private String dateTimeString;
+    private final String dateTimeString;
+    @JsonIgnore
+    private final SimpleDateFormat dateFormat;
 
-    public DateTimeJson(Date date, DateFormat dateFormat) {
+    public DateTimeJson(Date date, SimpleDateFormat dateFormat) {
         this.dateTimeString = dateFormat.format(date);
-    }
-
-    public String getDateTimeString() {
-        return dateTimeString;
+        this.dateFormat = dateFormat;
     }
 
     @Override
-    public String toString() {
-        return "{" +
-                "dateTimeString='" + dateTimeString + '\'' +
-                '}';
+    public int compareTo(@NotNull DateTimeJson dateTimeJson) {
+        return LocalDateTime.parse(getDateTimeString(), DateTimeFormatter.ofPattern(getDateFormat().toPattern()))
+                .compareTo(LocalDateTime.parse(dateTimeJson.getDateTimeString(), DateTimeFormatter.ofPattern(getDateFormat().toPattern())));
     }
 }

@@ -117,6 +117,9 @@ public class DBServiceImpl implements IDBService {
             for (String databaseFilePath : databaseFilesPath) {
                 logger.info(String.format("Loading \"%s\"", databaseFilePath));
                 Table databasePart = new Table(new File(databaseFilePath));
+                if (databasePart.getDatabaseDate().compareTo(database.getDatabaseDate()) > 0) {
+                    database.setDatabaseDate(databasePart.getDatabaseDate());
+                }
                 databasePart.saveRowAccordingFilter(row -> !row.isEmpty());
                 DBConfigsColumns[] configsColumns = configLoader.getMfStockConfig().getDBConfigs().getColumns();
                 if (configsColumns != null) {
