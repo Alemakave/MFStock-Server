@@ -46,6 +46,10 @@ public class TableCell implements ToHtmlFunction {
         return new TableCell(getValue());
     }
 
+    public boolean isEmpty() {
+        return getValue().isEmpty();
+    }
+
     @Override
     public String applyAsHtml() {
         return String.format("<div class=\"table-cell\">%s</div>", value);
