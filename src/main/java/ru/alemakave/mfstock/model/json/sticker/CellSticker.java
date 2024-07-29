@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @EqualsAndHashCode
@@ -15,4 +17,9 @@ public class CellSticker implements Sticker {
     private String cellAddress;
     @JsonProperty("CellCode")
     private String cellCode;
+
+    @Override
+    public UUID getUUID() {
+        return UUID.nameUUIDFromBytes(toString().getBytes());
+    }
 }

@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
@@ -13,4 +15,9 @@ import lombok.ToString;
 public class NomSerSticker extends NomSticker {
     @JsonProperty("NomSerial")
     private String serial;
+
+    @Override
+    public UUID getUUID() {
+        return UUID.nameUUIDFromBytes(toString().getBytes());
+    }
 }

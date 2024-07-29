@@ -52,7 +52,7 @@
     text-align: center;
 }
 
-#change-input-button {
+#change-input-button, #download-excel-file-button {
     min-width: 40px;
     min-height: 40px;
     width: 40px;
@@ -63,7 +63,7 @@
     cursor: pointer;
 }
 
-#upload-image, #input-image {
+#upload-image, #input-image, #download-excel-image {
     min-width: 28px;
     min-height: 28px;
     height: 28px;

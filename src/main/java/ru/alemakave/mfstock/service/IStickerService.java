@@ -3,6 +3,7 @@ package ru.alemakave.mfstock.service;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import ru.alemakave.mfstock.dto.DownloadExcelStickerFileDto;
 import ru.alemakave.mfstock.model.StickerType;
 
 import java.io.IOException;
@@ -17,7 +18,8 @@ public interface IStickerService {
     ResponseEntity<String> uploadStickersDataTable(@RequestParam("data-file") MultipartFile file, String currentHtmlCode);
     String getOrderNumberStickerGenerator() throws IOException;
     ResponseEntity<String> getAvailablePrinters() throws Exception;
-    ResponseEntity<byte[]> getStickerFile(String uuidStr);
+    ResponseEntity<byte[]> getDownloadExcelStickerFile(String uuidStr);
     ResponseEntity<List<String>> postGenerateStickerExcelFile(String requestBody, StickerType stickerType);
     ResponseEntity<Void> postPrintSticker(String requestBody, StickerType stickerType);
+    ResponseEntity<List<String>> postDownloadExcelStickerFile(DownloadExcelStickerFileDto downloadExcelStickerFileDto);
 }

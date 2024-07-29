@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @EqualsAndHashCode
@@ -17,4 +19,9 @@ public class NomSticker implements Sticker {
     private String name;
     @JsonProperty("NomStickerCopies")
     private String copies;
+
+    @Override
+    public UUID getUUID() {
+        return UUID.nameUUIDFromBytes(toString().getBytes());
+    }
 }

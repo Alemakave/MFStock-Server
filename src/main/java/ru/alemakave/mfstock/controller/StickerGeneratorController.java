@@ -7,12 +7,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.alemakave.mfstock.dto.DownloadExcelStickerFileDto;
 import ru.alemakave.mfstock.service.IStickerService;
 import ru.alemakave.qr.ImageType;
 import ru.alemakave.qr.generator.QRGenerator;
 import ru.alemakave.slib.utils.ImageUtils;
 
 import java.io.*;
+import java.util.List;
 
 import static ru.alemakave.mfstock.model.StickerType.*;
 
@@ -88,6 +90,16 @@ public class StickerGeneratorController {
         }
     }
 
+    @GetMapping(path = "/mfstock-download-excel-sticker-file")
+    public ResponseEntity<byte[]> getDownloadExcelStickerFile(String filename) {
+        return generatorService.getDownloadExcelStickerFile(filename);
+    }
+
+    @PostMapping(path = "/mfstock-download-excel-sticker-file", consumes = "application/json")
+    public ResponseEntity<List<String>> postDownloadExcelStickerFile(@RequestBody DownloadExcelStickerFileDto downloadExcelStickerFileDto) {
+        return generatorService.postDownloadExcelStickerFile(downloadExcelStickerFileDto);
+    }
+
     @PostMapping(path = "/mfstock-generate-nom-ser-sticker", consumes = "application/json")
     public void postNomSerStickerGenerator(@RequestBody String requestBody) {
         generatorService.postPrintSticker(requestBody, NOM_SERIAL);
@@ -126,11 +138,6 @@ public class StickerGeneratorController {
     @PostMapping(path = "/mfstock-generate-nom-ser-sticker")
     public ResponseEntity<String> postNomSerStickerUploadFile(@RequestParam("data-file") MultipartFile file) {
         return generatorService.uploadStickersDataTable(file, getNomSerStickerGenerator());
-    }
-
-    @GetMapping(path = "/mfstock-get-sticker-file")
-    public ResponseEntity<byte[]> getStickerFile(@RequestParam("id") String uuidStr) {
-        return generatorService.getStickerFile(uuidStr);
     }
 
     @GetMapping("/mfstock-generate-qr-code")

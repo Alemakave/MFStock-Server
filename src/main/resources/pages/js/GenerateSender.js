@@ -119,3 +119,35 @@ async function printSelectedNomenclatures() {
         }
     }
 }
+
+async function downloadExcelFile() {
+        var stickerInputBlock = document.getElementById("sticker-input-block");
+        var json = "{";
+        if (stickerInputBlock.children[0].id.startsWith("input-")) {
+            var inputs = stickerInputBlock.children;
+            json += "\"StickerType\": \"NOM\",";
+            json += "\"Sticker\": {";
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].id == "input-select-printer") {
+                    continue;
+                }
+                json += "\"" + formatVariableToJava(stickerInputBlock.children[i].id.substring("input-".length)) + "\": \"" + stickerInputBlock.children[i].value + "\"";
+                if (i < inputs.length - 1) {
+                    json += ", ";
+                }
+            }
+            if (json.endsWith(", ")) {
+                json = json.substring(0, json.length - 2);
+            }
+            json += "}";
+        }
+        json += "}"
+        json = json.replaceAll("\\", "\\\\")
+        await fetch("/mfstock-download-excel-sticker-file", {
+                method: 'POST',
+                body: json,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+}

@@ -1,6 +1,7 @@
 package ru.alemakave.mfstock.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.zxing.WriterException;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.jsoup.Jsoup;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.util.StringUtils;
 import ru.alemakave.mfstock.configs.MFStockConfigLoader;
+import ru.alemakave.mfstock.dto.DownloadExcelStickerFileDto;
 import ru.alemakave.mfstock.exceptions.RuntimeIOException;
 import ru.alemakave.mfstock.exceptions.StickerGeneratorNotRegisteredException;
 import ru.alemakave.mfstock.exceptions.StickerTableException;
@@ -32,6 +34,7 @@ import ru.alemakave.mfstock.model.table.TableRow;
 import ru.alemakave.slib.PrintConfigurationBuilder;
 import ru.alemakave.slib.PrintConfigurationBuilder.ExcelPrintConfiguration;
 import ru.alemakave.slib.utils.ArrayUtils;
+import ru.alemakave.slib.utils.FileUtils;
 import ru.alemakave.slib.utils.PrintUtils;
 import ru.alemakave.slib.utils.function.Function;
 
@@ -228,10 +231,10 @@ public class StickerGeneratorServiceImpl implements IStickerService {
     }
 
     @Override
-    public ResponseEntity<byte[]> getStickerFile(String uuidStr) {
-        UUID uuid = UUID.fromString(uuidStr);
+    public ResponseEntity<byte[]> getDownloadExcelStickerFile(String filename) {
+        log.info("getDownloadExcelStickerFile: " + filename);
 
-        File file = new File(stickerDir, uuid + ".xlt");
+        File file = new File(stickerDir, filename + ".xlt");
         if (!file.exists()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -256,17 +259,7 @@ public class StickerGeneratorServiceImpl implements IStickerService {
 
             Sticker sticker = printStickerJson.getSticker();
 
-            StickerFileUUID fileUUID = new StickerFileUUID(UUID.nameUUIDFromBytes(requestBody.getBytes()));
-            File stickerFile = new File(stickerDir, String.format("%s+%s.xlt", fileUUID.getStickerFileUUID(), DateTimeFormatter.ofPattern(stickerFileDateTimeFormat).format(LocalDateTime.now())));
-
-            ArrayList<String> fileNames = new ArrayList<>();
-
-            if (!registeredStickerGenerators.containsKey(stickerType)) {
-                throw new StickerGeneratorNotRegisteredException("Sticker generator not registered");
-            }
-
-            registeredStickerGenerators.get(stickerType).generate(stickerFile, sticker).forEach(path -> fileNames.add(path.getName()));
-            return ResponseEntity.ok(fileNames);
+            return postGenerateStickerExcelFile(sticker, stickerType);
         } catch (Exception e) {
             log.error(String.format("%s: %s: %s", e.getClass().getName(), getClass().getName(), e.getMessage()));
             for (StackTraceElement stackTraceElement : e.getStackTrace()) {
@@ -321,6 +314,31 @@ public class StickerGeneratorServiceImpl implements IStickerService {
             throw new RuntimeException(e);
         }
 
+    }
+
+    @Override
+    public ResponseEntity<List<String>> postDownloadExcelStickerFile(DownloadExcelStickerFileDto downloadExcelStickerFileDto) {
+        log.info("postDownloadExcelStickerFile: " + downloadExcelStickerFileDto.toString());
+
+        try {
+            return postGenerateStickerExcelFile(downloadExcelStickerFileDto.getSticker(), downloadExcelStickerFileDto.getStickerType());
+        } catch (IOException | WriterException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private ResponseEntity<List<String>> postGenerateStickerExcelFile(Sticker sticker, StickerType stickerType) throws IOException, WriterException {
+        StickerFileUUID fileUUID = new StickerFileUUID(sticker.getUUID());
+        File stickerFile = new File(stickerDir, String.format("%s+%s.xlt", fileUUID.getStickerFileUUID(), DateTimeFormatter.ofPattern(stickerFileDateTimeFormat).format(LocalDateTime.now())));
+
+        ArrayList<String> fileNames = new ArrayList<>();
+
+        if (!registeredStickerGenerators.containsKey(stickerType)) {
+            throw new StickerGeneratorNotRegisteredException("Sticker generator not registered");
+        }
+
+        registeredStickerGenerators.get(stickerType).generate(stickerFile, sticker).forEach(path -> fileNames.add(FileUtils.getFileNameWithoutExtension(path.getName())));
+        return ResponseEntity.ok(fileNames);
     }
 
     private void validateTable(Table table) {
