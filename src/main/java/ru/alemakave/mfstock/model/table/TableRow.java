@@ -39,6 +39,24 @@ public class TableRow implements ToHtmlFunction {
         cells.add(new TableCell(cellValue, CellType.STRING));
     }
 
+    public void addCell(int index, TableCell cell) {
+        while (cells.size() < index) {
+            cells.add(TableCell.EMPTY);
+        }
+        cells.add(index, cell);
+    }
+
+    public void setCell(int index, TableCell cell) {
+        while (cells.size() <= index) {
+            cells.add(TableCell.EMPTY);
+        }
+        cells.set(index, cell);
+    }
+
+    public TableCell getCell(int index) {
+        return cells.get(index);
+    }
+
     @JsonIgnore
     public boolean isEmpty() {
         return toString().equals("|".repeat(cells.size()-1));

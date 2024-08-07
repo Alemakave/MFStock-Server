@@ -8,4 +8,5 @@ public interface IDBService {
     String closeDB();
     String reloadDB();
     Table getDB();
+    String find(String searchString);
 }

@@ -2,6 +2,9 @@ package ru.alemakave.mfstock.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.poi.ss.usermodel.CellType;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,28 +24,25 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class DBServiceImpl implements IDBService {
     private static final String CLOSE_DB_PAGE_RESOURCE_PATH = "classpath:/pages/MFStockCloseDBStatus.html";
     private static final String LOAD_DB_PAGE_RESOURCE_PATH = "classpath:/pages/MFStockLoadDBStatus.html";
+    private static final String FIND_PAGE_RESOURCE_PATH = "classpath:/pages/MFStockFindPage.html";
 
     private final Logger logger = LoggerFactory.getLogger(DBServiceImpl.class);
 
-    @Value("${mfstock.database.path}")
-    private String databaseFilePath;
+    private final List<String> databaseFilesPath;
 
     private Table database = null;
     private final MFStockConfigLoader configLoader;
     private final ConfigurableApplicationContext configurableApplicationContext;
 
-    public DBServiceImpl(MFStockConfigLoader configLoader, ConfigurableApplicationContext configurableApplicationContext) {
+    public DBServiceImpl(MFStockConfigLoader configLoader, ConfigurableApplicationContext configurableApplicationContext, @Value("${mfstock.database.path}") String databaseFilesPath) {
         this.configLoader = configLoader;
         this.configurableApplicationContext = configurableApplicationContext;
-        if (databaseFilePath == null) {
-            databaseFilePath = ".\\Cache\\DB.xlsx";
-        }
+        this.databaseFilesPath = List.of(databaseFilesPath.split(File.pathSeparator));
     }
 
     @Override
@@ -67,6 +67,9 @@ public class DBServiceImpl implements IDBService {
     @Override
     public String findFromScan(String searchString) {
         try {
+            if (searchString == null || searchString.isEmpty()) {
+                return new ObjectMapper().writerWithDefaultPrettyPrinter().withRootName("rows").writeValueAsString(null);
+            }
             searchString = searchString.strip();
             logger.info("Search string: " + searchString);
             List<TableRow> rows = new ArrayList<>();
@@ -100,48 +103,58 @@ public class DBServiceImpl implements IDBService {
     @PostConstruct
     private void loadDB() {
         try {
-            database = new Table(new File(databaseFilePath));
-            database.saveRowAccordingFilter(row -> !row.isEmpty());
-            DBConfigsColumns[] configsColumns = configLoader.getMfStockConfig().getDBConfigs().getColumns();
-            if (configsColumns != null) {
-                database.saveColumnsAccordingHeaders(configsColumns);
-                database.addColumnPrefix(configsColumns);
+            if (databaseFilesPath == null) {
+                logger.error("Database file path not set! Set database file path parameter \"--mfstock.database.path=[file path]\" and rerun application.");
+                return;
             }
-            calculateCellValue();
+
+            database = new Table(new ArrayList<>());
+            TableRow headerRow = new TableRow();
+            for (DBConfigsColumns column : configLoader.getMfStockConfig().getDBConfigs().getColumns()) {
+                headerRow.addCell(new TableCell(column.getHeaderText(), CellType.STRING));
+            }
+            database.addRows(headerRow);
+            for (String databaseFilePath : databaseFilesPath) {
+                logger.info(String.format("Loading \"%s\"", databaseFilePath));
+                Table databasePart = new Table(new File(databaseFilePath));
+                databasePart.saveRowAccordingFilter(row -> !row.isEmpty());
+                DBConfigsColumns[] configsColumns = configLoader.getMfStockConfig().getDBConfigs().getColumns();
+                if (configsColumns != null) {
+                    databasePart.saveColumnsAccordingHeaders(configsColumns);
+                    databasePart.addColumnPrefix(configsColumns);
+                }
+                database.encourage(databasePart);
+            }
+            logger.info("DB loaded.");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void calculateCellValue() {
-        List<TableRow> rows = database.getRows();
+    @Override
+    public String find(String searchString) {
+        Document jsoupDocument = Jsoup.parse(PageUtils.getPage(configurableApplicationContext.getResource(FIND_PAGE_RESOURCE_PATH)));
 
-        int nomCodeIndex = rows.get(0).getCells().indexOf(new TableCell("Номенклатурный код"));  //0;
-        int nomSerIndex = rows.get(0).getCells().indexOf(new TableCell("Серийный Номер Изг."));  //3;
-        int nomCountIndex = rows.get(0).getCells().indexOf(new TableCell("Кол-во"));             //4;
-        int nomCellAddressIndex = rows.get(0).getCells().indexOf(new TableCell("Номер ячейки")); //6;
+        List<TableRow> rows = new ArrayList<>();
+        if (searchString != null && !searchString.isEmpty()) {
+            searchString = searchString.strip();
+            logger.info("Search string: " + searchString);
+            rows.add(getDB().getRows().get(0));
 
-        for (int i = 0; i < rows.size(); i++) {
-            for (int j = i+1; j < rows.size(); j++) {
-                List<TableCell> cells1 = rows.get(i).getCells();
-                List<TableCell> cells2 = rows.get(j).getCells();
-                if (cells1 == null || cells2 == null) {
-                    continue;
-                }
-
-                if (cells1.get(nomCodeIndex).equals(cells2.get(nomCodeIndex))
-                        && cells1.get(nomSerIndex).equals(cells2.get(nomSerIndex))
-                        && cells1.get(nomCellAddressIndex).equals(cells2.get(nomCellAddressIndex))) {
-                    TableCell countCell = cells1.get(nomCountIndex);
-                    countCell.setValue(Integer.toString(Integer.parseInt(countCell.getValue()) + Integer.parseInt(cells2.get(nomCountIndex).getValue())));
-                    rows.get(j).setCells(null);
-                }
+            String[] searchSubString = searchString.split("#");
+            List<TableRow> findedRows = TableUtils.findRowContains(getDB().getRows(), searchSubString[0]);
+            for (int i = 1; i < searchSubString.length; i++) {
+                findedRows = TableUtils.findRowContains(findedRows, searchSubString[i]);
             }
+
+            rows.addAll(findedRows);
         }
 
-        database.setRows(rows.stream()
-                .filter(tableRow -> tableRow.getCells() != null)
-                .collect(Collectors.toList())
-        );
+        if (searchString != null && !searchString.isEmpty()) {
+            jsoupDocument.body().child(1).append(new Table(rows).applyAsHtml());
+            jsoupDocument.body().append("<script type=\"text/javascript\" src=\"/js/qr-generator-button.js\"></script>");
+        }
+
+        return jsoupDocument.toString();
     }
 }

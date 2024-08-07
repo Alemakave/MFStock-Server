@@ -9,6 +9,8 @@ import ru.alemakave.mfstock.utils.function.ToHtmlFunction;
 import java.util.Objects;
 
 public class TableCell implements ToHtmlFunction {
+    public static final TableCell EMPTY = new TableCell("").copy();
+
     private String value;
     @JsonIgnore
     private CellType cellType;
@@ -38,6 +40,10 @@ public class TableCell implements ToHtmlFunction {
 
     public void setCellType(CellType cellType) {
         this.cellType = cellType;
+    }
+
+    public TableCell copy() {
+        return new TableCell(getValue());
     }
 
     @Override

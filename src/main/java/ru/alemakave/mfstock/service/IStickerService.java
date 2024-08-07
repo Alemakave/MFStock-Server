@@ -19,5 +19,5 @@ public interface IStickerService {
     ResponseEntity<String> getAvailablePrinters() throws Exception;
     ResponseEntity<byte[]> getStickerFile(String uuidStr);
     ResponseEntity<List<String>> postGenerateStickerExcelFile(String requestBody, StickerType stickerType);
-    void postPrintSticker(String requestBody, StickerType stickerType);
+    ResponseEntity<Void> postPrintSticker(String requestBody, StickerType stickerType);
 }
