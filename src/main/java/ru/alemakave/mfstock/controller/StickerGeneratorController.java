@@ -1,18 +1,27 @@
 package ru.alemakave.mfstock.controller;
 
+import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
+import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.alemakave.barcode.generator.BarcodeGenerator;
+import ru.alemakave.mfstock.dto.StickerDto;
+import ru.alemakave.mfstock.dto.StickersDto;
+import ru.alemakave.mfstock.generators.html.*;
+import ru.alemakave.mfstock.model.json.sticker.*;
 import ru.alemakave.mfstock.service.IStickerService;
-import ru.alemakave.qr.ImageType;
-import ru.alemakave.qr.generator.QRGenerator;
+import ru.alemakave.barcode.ImageType;
 import ru.alemakave.slib.utils.ImageUtils;
 
+import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.Collections;
 
 import static ru.alemakave.mfstock.model.StickerType.*;
 
@@ -128,6 +137,7 @@ public class StickerGeneratorController {
         return generatorService.uploadStickersDataTable(file, getNomSerStickerGenerator());
     }
 
+    @Deprecated(forRemoval = true)
     @GetMapping(path = "/mfstock-get-sticker-file")
     public ResponseEntity<byte[]> getStickerFile(@RequestParam("id") String uuidStr) {
         return generatorService.getStickerFile(uuidStr);
@@ -136,10 +146,87 @@ public class StickerGeneratorController {
     @GetMapping("/mfstock-generate-qr-code")
     public ResponseEntity<byte[]> getGenerateQRCode(@RequestParam("data") String data) {
         try {
-            return ResponseEntity.ok(ImageUtils.toByteArray(QRGenerator.generateToBufferedImage(data), ImageType.PNG.name()));
+            return ResponseEntity.ok()
+                    .headers(httpHeaders -> httpHeaders.put("Content-Type", Collections.singletonList(MediaType.IMAGE_PNG_VALUE)))
+                    .body(ImageUtils.toByteArray(BarcodeGenerator.generateBufferedImage(BarcodeFormat.QR_CODE, data), ImageType.PNG.name()));
         } catch (IOException | WriterException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @GetMapping("/mfstock-generate-barcode")
+    public ResponseEntity<byte[]> getGenerateBarcode(@RequestParam BarcodeFormat barcodeFormat,
+                                                     @RequestParam("data") String data,
+                                                     @RequestParam(name = "width", defaultValue = "-1") int width,
+                                                     @RequestParam(name = "height", defaultValue = "-1") int height) {
+        try {
+            ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.ok()
+                    .headers(httpHeaders -> httpHeaders.put("Content-Type", Collections.singletonList(MediaType.IMAGE_PNG_VALUE)));
+
+            BufferedImage barcodeBufferedImage;
+
+            if (width == -1 || height == -1) {
+                barcodeBufferedImage = BarcodeGenerator.generateBufferedImage(barcodeFormat, data);
+            } else {
+                barcodeBufferedImage = BarcodeGenerator.generateBufferedImage(barcodeFormat, data, width, height);
+            }
+
+            return responseBuilder
+                    .body(ImageUtils.toByteArray(barcodeBufferedImage, ImageType.PNG.name()));
+        } catch (IOException | WriterException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PostMapping("/mfstock-show-print-nom-stickers")
+    public ResponseEntity<String> postShowPrintNomStickers(@RequestBody StickersDto<NomSticker> stickersNomDto) {
+        return getShowPrintStickers(stickersNomDto);
+    }
+
+    @PostMapping("/mfstock-show-print-nom-ser-stickers")
+    public ResponseEntity<String> postShowPrintNomSerStickers(@RequestBody StickersDto<NomSerSticker> stickersNomSerDto) {
+        return getShowPrintStickers(stickersNomSerDto);
+    }
+
+    @PostMapping("/mfstock-show-print-employee-stickers")
+    public ResponseEntity<String> postShowPrintEmployeeStickers(@RequestBody StickersDto<EmployeeSticker> employeeStickerDto) {
+        return getShowPrintStickers(employeeStickerDto);
+    }
+
+    @PostMapping("/mfstock-show-print-cell-stickers")
+    public ResponseEntity<String> postShowPrintCellStickers(@RequestBody StickersDto<CellSticker> cellStickerDto) {
+        return getShowPrintStickers(cellStickerDto);
+    }
+
+    @PostMapping("/mfstock-show-print-order-number-stickers")
+    public ResponseEntity<String> postShowPrintOrderNumberStickers(@RequestBody StickersDto<OrderNumberSticker> orderNumberSticker) {
+        return getShowPrintStickers(orderNumberSticker);
+    }
+
+    @SneakyThrows
+    private ResponseEntity<String> getShowPrintStickers(@RequestBody StickersDto<?> stickersDto) {
+        StringBuilder stickers = new StringBuilder();
+        NomHtmlStickerGenerator nomHtmlStickerGenerator = new NomHtmlStickerGenerator();
+        NomSerHtmlStickerGenerator nomSerHtmlStickerGenerator = new NomSerHtmlStickerGenerator();
+        EmployeeHtmlStickerGenerator employeeStickerGenerator = new EmployeeHtmlStickerGenerator();
+        CellHtmlStickerGenerator cellStickerGenerator = new CellHtmlStickerGenerator();
+        OrderNumberHtmlStickerGenerator orderNumberHtmlStickerGenerator = new OrderNumberHtmlStickerGenerator();
+
+        for (StickerDto<?> stickerDto : stickersDto.getStickers()) {
+            if (stickerDto.getType().equalsIgnoreCase("NOM")) {
+                stickers.append(new String(nomHtmlStickerGenerator.generate((NomSticker) stickerDto.getSticker())));
+            } else if (stickerDto.getType().equalsIgnoreCase("NOM_SERIAL")) {
+                stickers.append(new String(nomSerHtmlStickerGenerator.generate((NomSerSticker) stickerDto.getSticker())));
+            } else if (stickerDto.getType().equalsIgnoreCase("EMPLOYEE")) {
+                stickers.append(new String(employeeStickerGenerator.generate((EmployeeSticker) stickerDto.getSticker())));
+            } else if (stickerDto.getType().equalsIgnoreCase("CELL")) {
+                stickers.append(new String(cellStickerGenerator.generate((CellSticker) stickerDto.getSticker())));
+            } else if (stickerDto.getType().equalsIgnoreCase("ORDER_NUMBER")) {
+                stickers.append(new String(orderNumberHtmlStickerGenerator.generate((OrderNumberSticker) stickerDto.getSticker())));
+            }
+        }
+
+        return ResponseEntity.ok(stickers.toString());
     }
 
     @ExceptionHandler({RuntimeException.class})

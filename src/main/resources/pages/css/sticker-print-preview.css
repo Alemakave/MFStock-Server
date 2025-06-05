@@ -1,0 +1,111 @@
+#sticker-print-preview {
+    display: none;
+    position: absolute;
+    background: #00000077;
+    min-width: 100%;
+    min-height: 100%;
+    top: 0;
+    text-align: center;
+}
+
+.sticker {
+    background: white;
+    width: 55mm;
+    height: 55mm;
+    margin: 6px;
+    display: inline-flex;
+    font-family: Arial Cyr, serif;
+    text-align: left;
+}
+
+.sticker > .sticker-barcode {
+    width: 22mm;
+    height: 22mm;
+    margin: auto 6px;
+    image-rendering: pixelated;
+}
+
+.sticker > .sticker-data {
+    max-width: 33mm;
+    margin: auto 0;
+    word-wrap: anywhere;
+    font-weight: bold;
+}
+
+.sticker > .sticker-data > div {
+    padding: 3px 0;
+}
+
+.sticker.employee,
+.sticker.cell,
+.sticker.order {
+    display: inline-block;
+    text-align: center;
+    align-content: center;
+}
+
+.sticker.cell {
+    align-content: start;
+}
+
+.sticker > .sticker-barcode.employee-code,
+.sticker > .sticker-barcode.cell-code {
+    margin: auto;
+}
+
+.sticker > .sticker-data.employee-name,
+.sticker > .sticker-data.employee-pass,
+.sticker > .sticker-barcode.employee-code,
+.sticker > .sticker-data.cell-address,
+.sticker > .sticker-data.cell-code,
+.sticker > .sticker-barcode.cell-code,
+.sticker > .sticker-data.order-number,
+.sticker > .sticker-data.order-count-cargo-spaces {
+    max-width: none;
+}
+
+.sticker > .sticker-data.cell-address,
+.sticker > .sticker-barcode.cell-code {
+    padding: 5px 0;
+}
+
+.sticker > .sticker-data.cell-code {
+    padding: 20px 0;
+}
+
+.sticker > .sticker-data.cell-address {
+    font-size: 40pt;
+}
+
+.sticker > .sticker-data.order-number {
+    font-size: 26pt;
+}
+
+.sticker > .sticker-data.order-count-cargo-spaces {
+    font-size: 20pt;
+    margin-top: 25px;
+}
+
+.sticker > .sticker-barcode.cell-code {
+    margin: 0;
+    width: 90%;
+    height: 14mm;
+}
+
+@page {
+    size: 55mm 55mm;
+    margin: 0;
+}
+
+@media print {
+    .sticker-print-preview > .sticker {
+        width: 55mm;
+        height: 55mm;
+        background: white;
+    }
+
+    #sticker, #upload, #header,
+    #upload-table, .topnav, .contextMenu {
+        display: none;
+    }
+}

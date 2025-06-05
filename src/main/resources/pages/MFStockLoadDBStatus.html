@@ -2,11 +2,30 @@
 <html lang="ru">
     <head>
         <meta charset="UTF-8">
-        <title>Close DB</title>
+        <title>БД загружена</title>
+        <script type="text/javascript" src="/js/utils.js"></script>
+        <script>
+            let timerInterval = setInterval(function() {
+                let timer = document.getElementById("timer");
+                let timerContentParts = timer.textContent.split(" ");
+                let timerValue = parseInt(timerContentParts[timerContentParts.length - 1]);
+                timerValue--;
+
+                if (timerValue == 0) {
+                    window.location.replace(window.location.origin);
+
+                    clearInterval(timerInterval);
+                }
+
+                timer.textContent = timer.textContent.replace(timerValue + 1, timerValue);
+            }, 1000);
+        </script>
     </head>
     <body style="padding: 0;margin: 0;">
-        <div style="width: 100vw;height: 100vh;display: grid;justify-items: center;">
-            <h1 style="width: 200px;text-align: center;">DB loaded</h1>
+        <div style="width: 100vw;height: 100vh;display: grid;justify-items: center;grid-template-rows: 60px 60px auto;">
+            <h1 style="height: 60px;text-align: center;">БД загружена</h1>
+            <h2 id="timer" style="height: 60px;text-align: center;">Перенаправление через 3</h2>
+            <div class="filler"></div>
         </div>
     </body>
 </html>

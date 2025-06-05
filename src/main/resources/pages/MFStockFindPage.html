@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
     <head>
         <meta charset="UTF-8">
         <title>MFStock find</title>
+        <script type="text/javascript" src="/js/utils.js"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         <link rel="stylesheet" href="/css/generator.css">
-        <link rel="stylesheet" href="/css/find-page.css">
         <link rel="stylesheet" href="/css/table.css">
+        <link rel="stylesheet" href="/css/find-page.css">
         <script type="text/javascript" src="/js/jquery.js"></script>
         <script type="text/javascript" src="/js/db-functions.js"></script>
         <script>
@@ -25,7 +26,7 @@
     <body>
         <div id="header">
         </div>
-        <div class="content">
+        <div id="content" style="display: block;">
             <div class="topnav">
                 <div class="search-container">
                     <input type="text" placeholder="Поиск.." name="search">
@@ -33,6 +34,7 @@
                 </div>
             </div>
         </div>
+        <script type="text/javascript" src="/js/ContextMenu.js"></script>
         <script type="text/javascript">
             var searchInputElement = document.getElementsByClassName("search-container")[0].getElementsByTagName("input")['search'];
             var searchButtonElement = document.getElementsByClassName("search-container")[0].getElementsByTagName("button")[0];

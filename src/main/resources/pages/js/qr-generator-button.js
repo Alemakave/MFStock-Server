@@ -1,3 +1,7 @@
+loadScript("/js/ContextMenu.js");
+
+loadStyle("/css/qr-generator.css");
+
 var prevRange = null;
 
 function getRangeObject(win) {
@@ -20,10 +24,19 @@ window.onmouseup = function(e) {
             document.getElementsByClassName("qr-generator-button")[0].remove();
         }
 
-        if (prevRange != range && range != undefined && range.toString().trim().length > 0) {
+        if (!e.target.classList.contains("contextMenu") && e.target.parentElement && !e.target.parentElement.classList.contains("contextMenu")) {
+            hideContextMenu();
+        }
+        while (document.getElementsByClassName("selected").length > 0) {
+            document.getElementsByClassName("selected")[0].classList.remove("selected");
+        }
+
+        if (prevRange !== range && range !== undefined && range.toString().trim().length > 0) {
             if (!e.target.classList.contains("table-cell")) {
                 return;
             }
+
+            e.target.classList.add("selected");
 
             var generateQrButton = document.createElement("div");
             generateQrButton.classList.add("qr-generator-button");
@@ -36,7 +49,11 @@ window.onmouseup = function(e) {
                 generateQrButton.style.height = "150px";
                 generateQrButton.classList.add("qr-code");
                 var qrCode = document.createElement("img");
-                qrCode.src = "/mfstock-generate-qr-code?data=" + range.startContainer.data.trim();
+                if (range.startContainer.nodeName === "#text") {
+                    qrCode.src = "/mfstock-generate-qr-code?data=" + range.startContainer.data.trim().replace("#", "%23");
+                } else {
+                    qrCode.src = "/mfstock-generate-qr-code?data=" + range.startContainer.textContent.trim().replace("#", "%23");
+                }
                 qrCode.style.width = "100%";
                 qrCode.style.height = "100%";
                 generateQrButton.append(qrCode);
@@ -47,8 +64,3 @@ window.onmouseup = function(e) {
         }
     }
 }
-
-var qrGeneratorStyle = document.createElement("link");
-qrGeneratorStyle.rel = "stylesheet";
-qrGeneratorStyle.href = "/css/qr-generator.css";
-document.head.append(qrGeneratorStyle);

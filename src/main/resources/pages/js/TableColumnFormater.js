@@ -5,7 +5,7 @@ function markInputBoxWithColumnIds() {
 
         for (var i = 0; i < headerCells.length; i++) {
             for (var j = 0; j < inputLabels.length; j++) {
-                if (!inputLabels[j].id.startsWith("input-nom")) {
+                if (!inputLabels[j].id.startsWith("input-nom") && !inputLabels[j].id.startsWith("input-cell")) {
                     continue;
                 }
 
@@ -14,8 +14,8 @@ function markInputBoxWithColumnIds() {
                 var inputLabelText = inputLabels[j].placeholder.toLowerCase();
 
                 if (
-                    (headerCellText && inputLabelText && headerCellText == inputLabelText)
-                     || labelText == headerCellText
+                    (headerCellText && inputLabelText && headerCellText === inputLabelText)
+                     || labelText === headerCellText
                 ) {
                     inputLabels[j].classList.add("column_" + i);
                     break;
