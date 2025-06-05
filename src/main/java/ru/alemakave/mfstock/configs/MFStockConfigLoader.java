@@ -8,10 +8,11 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import ru.alemakave.mfstock.model.UserDataRoles;
 import ru.alemakave.mfstock.model.configs.DBConfigs;
 import ru.alemakave.mfstock.model.configs.DBConfigsColumns;
 import ru.alemakave.mfstock.model.configs.MFStockConfig;
-import ru.alemakave.mfstock.model.configs.UserData;
+import ru.alemakave.mfstock.model.UserData;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +36,7 @@ public class MFStockConfigLoader {
         File propertiesFile = new File(propertiesFilePath);
         if (!propertiesFile.exists()) {
             try {
-                MFStockConfig newConfig = new MFStockConfig("", new DBConfigs(new DBConfigsColumns[]{new DBConfigsColumns()}), new UserData[0]);
+                MFStockConfig newConfig = new MFStockConfig("", new DBConfigs(new DBConfigsColumns[]{new DBConfigsColumns()}), new UserData[] {new UserData("admin", "changeme", UserDataRoles.ADMIN)});
 
                 ObjectMapper objectMapper = new ObjectMapper();
                 objectMapper
