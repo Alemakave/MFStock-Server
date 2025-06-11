@@ -1,4 +1,4 @@
-package ru.alemakave.mfstock.service;
+package ru.alemakave.mfstock.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.ss.usermodel.CellType;
@@ -15,12 +15,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.thymeleaf.util.StringUtils;
 import ru.alemakave.mfstock.configs.MFStockConfigLoader;
 import ru.alemakave.mfstock.exceptions.RuntimeIOException;
 import ru.alemakave.mfstock.exceptions.StickerGeneratorNotRegisteredException;
 import ru.alemakave.mfstock.exceptions.StickerTableException;
 import ru.alemakave.mfstock.generators.*;
+import ru.alemakave.mfstock.generators.excel.*;
 import ru.alemakave.mfstock.model.StickerType;
 import ru.alemakave.mfstock.model.configs.DBConfigsColumns;
 import ru.alemakave.mfstock.model.json.PrintStickerJson;
@@ -29,6 +29,7 @@ import ru.alemakave.mfstock.model.json.sticker.*;
 import ru.alemakave.mfstock.model.table.Table;
 import ru.alemakave.mfstock.model.table.TableCell;
 import ru.alemakave.mfstock.model.table.TableRow;
+import ru.alemakave.mfstock.service.IStickerService;
 import ru.alemakave.slib.PrintConfigurationBuilder;
 import ru.alemakave.slib.PrintConfigurationBuilder.ExcelPrintConfiguration;
 import ru.alemakave.slib.utils.ArrayUtils;
@@ -59,19 +60,21 @@ public class StickerGeneratorServiceImpl implements IStickerService {
     private static final Logger log = LoggerFactory.getLogger(StickerGeneratorServiceImpl.class);
     private final MFStockConfigLoader configLoader;
     private final ConfigurableApplicationContext context;
-    private final Map<StickerType, StickerGenerator> registeredStickerGenerators = new HashMap<>();
+    private final Map<StickerType, StickerGenerator<? extends Sticker>> registeredStickerGenerators = new HashMap<>();
     public final String stickerDir;
     public final String stickerFileDateTimeFormat = "yyyyMMdd-HHmmss";
 
-    public StickerGeneratorServiceImpl(MFStockConfigLoader configLoader, ConfigurableApplicationContext configurableApplicationContext, @Value("${mfstock.sticker.generated.folder.path:./generated_sticker}") String stickerDir) {
+    public StickerGeneratorServiceImpl(MFStockConfigLoader configLoader,
+                                       ConfigurableApplicationContext configurableApplicationContext,
+                                       @Value("${mfstock.sticker.generated.folder.path:./generated_sticker}") String stickerDir) {
         this.configLoader = configLoader;
         this.context = configurableApplicationContext;
         this.stickerDir = stickerDir;
-        registeredStickerGenerators.put(CELL, new CellStickerGenerator(configurableApplicationContext));
-        registeredStickerGenerators.put(EMPLOYEE, new EmployeeStickerGenerator(configurableApplicationContext));
-        registeredStickerGenerators.put(NOM, new NomStickerGenerator(configurableApplicationContext));
-        registeredStickerGenerators.put(NOM_SERIAL, new NomSerStickerGenerator(configurableApplicationContext));
-        registeredStickerGenerators.put(ORDER_NUMBER, new OrderNumberStickerGenerator(configurableApplicationContext));
+        registeredStickerGenerators.put(CELL, new CellExcelStickerGenerator(configurableApplicationContext));
+        registeredStickerGenerators.put(EMPLOYEE, new EmployeeExcelStickerGenerator(configurableApplicationContext));
+        registeredStickerGenerators.put(NOM, new NomExcelStickerGenerator(configurableApplicationContext));
+        registeredStickerGenerators.put(NOM_SERIAL, new NomSerExcelStickerGenerator(configurableApplicationContext));
+        registeredStickerGenerators.put(ORDER_NUMBER, new OrderNumberExcelStickerGenerator(configurableApplicationContext));
     }
 
     @Override
@@ -151,7 +154,7 @@ public class StickerGeneratorServiceImpl implements IStickerService {
 
             validateTable(table);
 
-            table.getRows().removeIf(tableRow -> tableRow.toString().equals(StringUtils.repeat("|", tableRow.getCells().size()-1)));
+            table.getRows().removeIf(tableRow -> tableRow.toString().equals("|".repeat(tableRow.getCells().size()-1)));
             ArrayList<DBConfigsColumns> columns = new ArrayList<>();
 
             List<Element> inputs =  jsoupDocument.getElementsByClass("input")
@@ -265,7 +268,7 @@ public class StickerGeneratorServiceImpl implements IStickerService {
                 throw new StickerGeneratorNotRegisteredException("Sticker generator not registered");
             }
 
-            registeredStickerGenerators.get(stickerType).generate(stickerFile, sticker).forEach(path -> fileNames.add(path.getName()));
+            ((ExcelStickerGenerator)registeredStickerGenerators.get(stickerType)).generate(stickerFile, sticker).forEach(path -> fileNames.add(((File)path).getName()));
             return ResponseEntity.ok(fileNames);
         } catch (Exception e) {
             log.error(String.format("%s: %s: %s", e.getClass().getName(), getClass().getName(), e.getMessage()));
@@ -294,7 +297,7 @@ public class StickerGeneratorServiceImpl implements IStickerService {
             ExcelPrintConfiguration printConfiguration = PrintConfigurationBuilder.buildExcelConfiguration(printerName);
             if (printStickerJson.getSticker() instanceof NomSticker) {
                 try {
-                    printConfiguration.setCopies(Integer.parseInt(((NomSticker) printStickerJson.getSticker()).getCopies()));
+                    printConfiguration.setCopies(((NomSticker) printStickerJson.getSticker()).getCopies());
                 } catch (NumberFormatException e) {
                     printConfiguration.setCopies(1);
 

@@ -17,4 +17,8 @@ public class NomSticker implements Sticker {
     private String name;
     @JsonProperty("NomStickerCopies")
     private String copies;
+
+    public int getCopies() {
+        return Integer.parseInt(copies);
+    }
 }

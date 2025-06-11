@@ -1,4 +1,4 @@
-package ru.alemakave.qr;
+package ru.alemakave.barcode;
 
 public enum ImageType {
     PNG(),

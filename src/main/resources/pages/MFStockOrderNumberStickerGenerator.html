@@ -3,6 +3,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>Генератор наклеек с номером заказа</title>
+		<script type="text/javascript" src="/js/utils.js"></script>
 		<script type="text/javascript" src="/js/GenerateSender.js"></script>
 		<script type="text/javascript" src="/js/jquery.js"></script>
 		<script type="text/javascript" src="/js/db-functions.js"></script>
@@ -31,6 +32,7 @@
     		});
     	</script>
 		<link rel="stylesheet" href="/css/generator.css">
+		<link rel="stylesheet" href="/css/sticker-print-preview.css">
 	</head>
 	<body>
 		<div id="header">
@@ -45,7 +47,7 @@
 				</div>
 				<div id="sticker-input-block">
 					<input class="input" id="input-order-number" placeholder="Номер заказа">
-					<input class="input" id="input-order-count-cargo-spaces" placeholder="Кол-во грузомест" type="number" min="0" value="0">
+					<input class="input" id="input-order-count-cargo-spaces" placeholder="Кол-во грузомест" type="number" min="0" value="0" pattern="\d+">
 					<select class="input" id="input-select-printer">
 						<option></option>
 					</select>
@@ -53,7 +55,7 @@
 			</div>
 				<div id="sticker-buttons-block">
 					<div style="width: 100%;"></div>
-					<button id="print-button" onclick="print();">Печать</button>
+					<button id="print-button" onclick="printSticker();">Печать</button>
 				</div>
 			</div>
 			<script type="text/javascript">

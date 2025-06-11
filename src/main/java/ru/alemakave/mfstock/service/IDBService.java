@@ -2,6 +2,8 @@ package ru.alemakave.mfstock.service;
 
 import ru.alemakave.mfstock.model.table.Table;
 
+import java.io.InputStream;
+
 public interface IDBService {
     Object getDBDate();
     String findFromScan(String searchString);
@@ -9,4 +11,6 @@ public interface IDBService {
     String reloadDB();
     Table getDB();
     String find(String searchString);
+    void uploadDB(InputStream databaseInputStream);
+    String getUploadDBPage();
 }

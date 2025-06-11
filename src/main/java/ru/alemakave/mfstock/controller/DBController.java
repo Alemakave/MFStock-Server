@@ -1,8 +1,14 @@
 package ru.alemakave.mfstock.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import ru.alemakave.mfstock.service.IDBService;
+
+import java.io.IOException;
 
 @RestController
 public class DBController {
@@ -30,5 +36,17 @@ public class DBController {
     @GetMapping(path = {"/mfstock-find"})
     public String find(String searchString) {
         return dbService.find(searchString);
+    }
+
+    @GetMapping(path = {"/mfstock-upload-db"})
+    public ResponseEntity<String> getUploadDB() {
+        return ResponseEntity.ok(dbService.getUploadDBPage());
+    }
+
+    @PostMapping(path = "/mfstock-upload-db")
+    public ResponseEntity<String> postUploadDB(@RequestParam("data-file") MultipartFile file) throws IOException {
+        dbService.uploadDB(file.getInputStream());
+
+        return ResponseEntity.ok(reloadDB());
     }
 }

@@ -2,19 +2,20 @@ package ru.alemakave.mfstock.configs;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import ru.alemakave.mfstock.model.UserDataRoles;
 import ru.alemakave.mfstock.model.configs.DBConfigs;
+import ru.alemakave.mfstock.model.configs.DBConfigsColumns;
 import ru.alemakave.mfstock.model.configs.MFStockConfig;
+import ru.alemakave.mfstock.model.UserData;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
 
@@ -22,13 +23,11 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 @Scope(scopeName = SCOPE_SINGLETON)
 public class MFStockConfigLoader {
     private final String propertiesFilePath;
-    private final Map<String, Object> configs = new HashMap<>();
-    private final MFStockConfig mfStockConfig;
+    @Getter
+    private MFStockConfig mfStockConfig;
 
-    public MFStockConfigLoader(ConfigurableApplicationContext configurableApplicationContext, MFStockConfig mfStockConfig, @Value("${mfstock.config.path:./MFStockServer.json}") String propertiesFilePath) {
-        this.mfStockConfig = mfStockConfig;
+    public MFStockConfigLoader(ConfigurableApplicationContext configurableApplicationContext, @Value("${mfstock.config.path:./MFStockServer.json}") String propertiesFilePath) {
         this.propertiesFilePath = propertiesFilePath;
-        putConfig(mfStockConfig);
         checkFileAndCreateIfNotFound();
         load(configurableApplicationContext);
     }
@@ -36,22 +35,13 @@ public class MFStockConfigLoader {
     private void checkFileAndCreateIfNotFound() {
         File propertiesFile = new File(propertiesFilePath);
         if (!propertiesFile.exists()) {
-            ((MFStockConfig)configs.get(mfStockConfig.getClass().getName())).setDBConfigs(new DBConfigs());
             try {
+                MFStockConfig newConfig = new MFStockConfig("", new DBConfigs(new DBConfigsColumns[]{new DBConfigsColumns()}), new UserData[] {new UserData("admin", "changeme", UserDataRoles.ADMIN)});
+
                 ObjectMapper objectMapper = new ObjectMapper();
-                ObjectNode resultNode = objectMapper.createObjectNode();
-
-                for (Object object : configs.values()) {
-                    ObjectNode objectNode = objectMapper.valueToTree(object);
-                    objectNode.fields().forEachRemaining(
-                            stringJsonNodeEntry -> resultNode.set(stringJsonNodeEntry.getKey(), stringJsonNodeEntry.getValue())
-                    );
-                }
-
-
                 objectMapper
                         .writerWithDefaultPrettyPrinter()
-                        .writeValue(new File(propertiesFilePath), resultNode);
+                        .writeValue(propertiesFile, newConfig);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -61,23 +51,12 @@ public class MFStockConfigLoader {
     private void load(ConfigurableApplicationContext configurableApplicationContext) {
         Resource resource = configurableApplicationContext.getResource("file:" + propertiesFilePath);
         try {
-            MFStockConfig mfStockConfig = new ObjectMapper()
+            mfStockConfig = new ObjectMapper()
                     .disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES)
                     .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                     .readValue(resource.getInputStream(), MFStockConfig.class);
-
-            this.mfStockConfig.setDBConfigs(mfStockConfig.getDBConfigs());
-            this.mfStockConfig.setPrinterName(mfStockConfig.getPrinterName());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private void putConfig(Object config) {
-        configs.put(config.getClass().getName(), config);
-    }
-
-    public MFStockConfig getMfStockConfig() {
-        return mfStockConfig;
     }
 }

@@ -3,9 +3,11 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>NomGenerator</title>
+		<script type="text/javascript" src="/js/utils.js"></script>
 		<script type="text/javascript" src="/js/GenerateSender.js"></script>
 		<script type="text/javascript" src="/js/jquery.js"></script>
 		<script type="text/javascript" src="/js/db-functions.js"></script>
+		<script type="text/javascript" src="/js/printPreview.js"></script>
 		<script>
     		$(function(){
       			$("#header").load("/html-part/header-part.html", function() {
@@ -35,6 +37,7 @@
     	</script>
 		<link rel="stylesheet" href="/css/generator.css">
 		<link rel="stylesheet" href="/css/table.css">
+		<link rel="stylesheet" href="/css/sticker-print-preview.css">
 	</head>
 	<body>
 		<div id="header">
@@ -56,7 +59,7 @@
 					</div>
 				</div>
 				<div id="upload-block" style="display: none;">
-					<form method="POST" enctype="multipart/form-data" action="/mfstock-generate-cell-sticker">
+					<form id="upload-form" method="POST" enctype="multipart/form-data" action="/mfstock-generate-cell-sticker">
 						<input type="file" name="data-file" id="data-file" accept="application/vnd.ms-excel, .xlsx">
 						<input class="submit" type="submit" value="Send" />
 					</form>
@@ -67,11 +70,11 @@
 						<img id="upload-image" src="/img/upload-file.svg" style="display: none;">
 						<img id="input-image" src="/img/input-field.svg" style="">
 					</div>
-					<button id="print-button" onclick="print();">Печать</button>
+					<button id="print-button" onclick="printSticker();">Печать</button>
 				</div>
 			</div>
-			<div id="upload">
-			</div>
+			<div id="upload"></div>
+			<div id="sticker-print-preview" onclick="closePrintPreview()"></div>
 		</div>
 		<script type="text/javascript" src="/js/ChangeInputButton.js"></script>
 		<script type="text/javascript">

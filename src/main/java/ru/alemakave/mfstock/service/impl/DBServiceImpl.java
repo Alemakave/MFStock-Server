@@ -1,4 +1,4 @@
-package ru.alemakave.mfstock.service;
+package ru.alemakave.mfstock.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,12 +16,15 @@ import ru.alemakave.mfstock.model.configs.DBConfigsColumns;
 import ru.alemakave.mfstock.model.table.Table;
 import ru.alemakave.mfstock.model.table.TableCell;
 import ru.alemakave.mfstock.model.table.TableRow;
+import ru.alemakave.mfstock.service.IDBService;
 import ru.alemakave.mfstock.utils.PageUtils;
 import ru.alemakave.mfstock.utils.TableUtils;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +33,7 @@ public class DBServiceImpl implements IDBService {
     private static final String CLOSE_DB_PAGE_RESOURCE_PATH = "classpath:/pages/MFStockCloseDBStatus.html";
     private static final String LOAD_DB_PAGE_RESOURCE_PATH = "classpath:/pages/MFStockLoadDBStatus.html";
     private static final String FIND_PAGE_RESOURCE_PATH = "classpath:/pages/MFStockFindPage.html";
+    private static final String UPLOAD_PAGE_RESOURCE_PATH = "classpath:/pages/MFStockUploadPage.html";
 
     private final Logger logger = LoggerFactory.getLogger(DBServiceImpl.class);
 
@@ -39,7 +43,9 @@ public class DBServiceImpl implements IDBService {
     private final MFStockConfigLoader configLoader;
     private final ConfigurableApplicationContext configurableApplicationContext;
 
-    public DBServiceImpl(MFStockConfigLoader configLoader, ConfigurableApplicationContext configurableApplicationContext, @Value("${mfstock.database.path}") String databaseFilesPath) {
+    public DBServiceImpl(MFStockConfigLoader configLoader,
+                         ConfigurableApplicationContext configurableApplicationContext,
+                         @Value("${mfstock.database.path}") String databaseFilesPath) {
         this.configLoader = configLoader;
         this.configurableApplicationContext = configurableApplicationContext;
         this.databaseFilesPath = List.of(databaseFilesPath.split(File.pathSeparator));
@@ -119,10 +125,8 @@ public class DBServiceImpl implements IDBService {
                 Table databasePart = new Table(new File(databaseFilePath));
                 databasePart.saveRowAccordingFilter(row -> !row.isEmpty());
                 DBConfigsColumns[] configsColumns = configLoader.getMfStockConfig().getDBConfigs().getColumns();
-                if (configsColumns != null) {
-                    databasePart.saveColumnsAccordingHeaders(configsColumns);
-                    databasePart.addColumnPrefix(configsColumns);
-                }
+                databasePart.saveColumnsAccordingHeaders(configsColumns);
+                databasePart.addColumnPrefix(configsColumns);
                 database.encourage(databasePart);
             }
             logger.info("DB loaded.");
@@ -156,5 +160,19 @@ public class DBServiceImpl implements IDBService {
         }
 
         return jsoupDocument.toString();
+    }
+
+    @Override
+    public void uploadDB(InputStream databaseInputStream) {
+        try {
+            Files.copy(databaseInputStream, Path.of(databaseFilesPath.get(0)), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public String getUploadDBPage() {
+        return PageUtils.getPage(configurableApplicationContext.getResource(UPLOAD_PAGE_RESOURCE_PATH));
     }
 }

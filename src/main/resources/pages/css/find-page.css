@@ -55,6 +55,10 @@
     background: #ccc;
 }
 
+#upload-table {
+    margin-bottom: 150px;
+}
+
 @media screen and (max-width: 600px) {
     .topnav .search-container {
         float: none;
